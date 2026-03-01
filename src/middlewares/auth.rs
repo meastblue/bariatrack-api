@@ -1,21 +1,19 @@
-use axum::body::Body;
-use axum::http::{Request, StatusCode};
-use axum::middleware::Next;
-use axum::response::Response;
+use crate::utils::auth::{extract_bearer_token, validate_token};
+use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
 use jsonwebtoken::DecodingKey;
-use tracing::error;
+use tracing::{info, error};
 
-pub async fn auth_middleware(req: Request<Body>, next: Next) -> Result<Response, StatusCode> {
-    let decoding_key = req
+pub async fn auth_middleware(request: Request<Body>, next: Next) -> Result<Response, StatusCode> {
+    let decoding_key = request
         .extensions()
         .get::<DecodingKey>()
         .cloned()
         .ok_or_else(|| {
-            error!("❌ No Authorization header");
-            StatusCode::UNAUTHORIZED
+            error!("❌ DecodingKey not found in extensions");
+            StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    let auth_header = req
+    let auth_header = request
         .headers()
         .get("authorization")
         .and_then(|v| v.to_str().ok())
@@ -23,6 +21,21 @@ pub async fn auth_middleware(req: Request<Body>, next: Next) -> Result<Response,
             error!("❌ No Authorization header");
             StatusCode::UNAUTHORIZED
         })?;
-    
-    Ok(next.run(req).await)
+
+    let token = extract_bearer_token(auth_header).ok_or_else(|| {
+        error!("❌ Could not extract Bearer token");
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let claims = validate_token(token, &decoding_key).map_err(|e| {
+        error!("❌ Token validation failed: {}", e);
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    info!("✅ Authenticated: {}", claims.sub);
+
+    let mut request = request;
+    request.extensions_mut().insert(claims);
+
+    Ok(next.run(request).await)
 }
