@@ -2,8 +2,8 @@ use async_graphql::{Context, Object};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::entity::User;
-use super::types::UserType;
+use super::entity::Profile;
+use super::types::{ProfileType, SyncProfileInput, UpdateProfileInput};
 use crate::utils::auth::Claims;
 
 fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
@@ -12,66 +12,87 @@ fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
         .map_err(|_| "Unauthorized: missing or invalid token".into())
 }
 
-fn get_supabase_uid(claims: &Claims) -> async_graphql::Result<Uuid> {
+fn get_auth_user_id(claims: &Claims) -> async_graphql::Result<Uuid> {
     claims
         .supabase_uid()
-        .map_err(|_| "Invalid supabase user ID".into())
+        .map_err(|_| "Invalid auth user ID".into())
 }
 
 // ── Query ──────────────────────────────────
 
 #[derive(Default)]
-pub struct UserQuery;
+pub struct ProfileQuery;
 
 #[Object]
-impl UserQuery {
-    /// Get current authenticated user
-    async fn me(&self, ctx: &Context<'_>) -> async_graphql::Result<UserType> {
+impl ProfileQuery {
+    /// Get current authenticated user profile
+    async fn me(&self, ctx: &Context<'_>) -> async_graphql::Result<ProfileType> {
         let claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
-        let supabase_uid = get_supabase_uid(&claims)?;
+        let auth_user_id = get_auth_user_id(&claims)?;
 
-        let user = User::find_by_supabase_uid(pool, supabase_uid)
+        let profile = Profile::find_by_auth_user_id(pool, auth_user_id)
             .await?
-            .ok_or("User not found. Call syncUser mutation first.")?;
+            .ok_or("Profile not found. Call syncProfile mutation first.")?;
 
-        Ok(user.into())
+        Ok(profile.into())
     }
 }
 
 // ── Mutation ───────────────────────────────
 
 #[derive(Default)]
-pub struct UserMutation;
+pub struct ProfileMutation;
 
 #[Object]
-impl UserMutation {
-    /// Sync user from Supabase Auth into local database
-    async fn sync_user(&self, ctx: &Context<'_>) -> async_graphql::Result<UserType> {
+impl ProfileMutation {
+    /// Sync profile from Supabase Auth into local database
+    /// Must be called after first login to create the profile
+    async fn sync_profile(
+        &self,
+        ctx: &Context<'_>,
+        input: SyncProfileInput,
+    ) -> async_graphql::Result<ProfileType> {
         let claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
-        let supabase_uid = get_supabase_uid(&claims)?;
+        let auth_user_id = get_auth_user_id(&claims)?;
         let email = claims.email.clone().ok_or("Email not found in token")?;
 
-        let user = User::upsert(pool, supabase_uid, &email).await?;
-        Ok(user.into())
+        let profile = Profile::upsert(pool, auth_user_id, &email, input.role.into()).await?;
+        Ok(profile.into())
     }
 
-    /// Update current user's profile
+    /// Update current user profile settings
     async fn update_profile(
         &self,
         ctx: &Context<'_>,
-        username: Option<String>,
-        avatar_url: Option<String>,
-    ) -> async_graphql::Result<UserType> {
+        input: UpdateProfileInput,
+    ) -> async_graphql::Result<ProfileType> {
         let claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
-        let supabase_uid = get_supabase_uid(&claims)?;
+        let auth_user_id = get_auth_user_id(&claims)?;
 
-        let user = User::update_profile(pool, supabase_uid, username, avatar_url)
+        if let Some(locale) = input.locale {
+            let profile = Profile::update_locale(pool, auth_user_id, locale)
+                .await?
+                .ok_or("Profile not found")?;
+            return Ok(profile.into());
+        }
+
+        let profile = Profile::find_by_auth_user_id(pool, auth_user_id)
             .await?
-            .ok_or("User not found")?;
+            .ok_or("Profile not found")?;
 
-        Ok(user.into())
+        Ok(profile.into())
+    }
+
+    /// Soft delete current user profile (RGPD)
+    async fn delete_profile(&self, ctx: &Context<'_>) -> async_graphql::Result<bool> {
+        let claims = get_claims(ctx)?;
+        let pool = ctx.data::<PgPool>()?;
+        let auth_user_id = get_auth_user_id(&claims)?;
+
+        let deleted = Profile::soft_delete(pool, auth_user_id).await?;
+        Ok(deleted)
     }
 }

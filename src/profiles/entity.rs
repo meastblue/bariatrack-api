@@ -1,80 +1,109 @@
 use chrono::{DateTime, Utc};
-use sqlx::{FromRow, PgPool};
+use sqlx::{FromRow, PgPool, Type};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, FromRow)]
-pub struct User {
-    pub id: Uuid,
-    pub supabase_uid: Uuid,
-    pub email: String,
-    pub username: Option<String>,
-    pub avatar_url: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+#[derive(Debug, Clone, PartialEq, Type)]
+#[sqlx(type_name = "user_role", rename_all = "snake_case")]
+pub enum UserRole {
+    Patient,
+    Doctor,
+    Admin,
 }
 
-impl User {
-    pub async fn find_by_supabase_uid(
+#[derive(Debug, Clone, FromRow)]
+pub struct Profile {
+    pub id: Uuid,
+    pub auth_user_id: Uuid,
+    pub email: String,
+    pub locale: String,
+    pub role: UserRole,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub deleted_at: Option<DateTime<Utc>>,
+}
+
+impl Profile {
+    pub async fn find_by_auth_user_id(
         pool: &PgPool,
-        supabase_uid: Uuid,
-    ) -> Result<Option<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>("SELECT * FROM users WHERE supabase_uid = $1")
-            .bind(supabase_uid)
-            .fetch_optional(pool)
-            .await
+        auth_user_id: Uuid,
+    ) -> Result<Option<Profile>, sqlx::Error> {
+        sqlx::query_as::<_, Profile>(
+            "SELECT * FROM profiles WHERE auth_user_id = $1 AND deleted_at IS NULL",
+        )
+        .bind(auth_user_id)
+        .fetch_optional(pool)
+        .await
     }
 
-    pub async fn get_id_by_supabase_uid(
+    pub async fn get_id_by_auth_user_id(
         pool: &PgPool,
-        supabase_uid: Uuid,
+        auth_user_id: Uuid,
     ) -> Result<Option<Uuid>, sqlx::Error> {
-        sqlx::query_scalar::<_, Uuid>("SELECT id FROM users WHERE supabase_uid = $1")
-            .bind(supabase_uid)
-            .fetch_optional(pool)
-            .await
+        sqlx::query_scalar::<_, Uuid>(
+            "SELECT id FROM profiles WHERE auth_user_id = $1 AND deleted_at IS NULL",
+        )
+        .bind(auth_user_id)
+        .fetch_optional(pool)
+        .await
     }
 
     pub async fn upsert(
         pool: &PgPool,
-        supabase_uid: Uuid,
+        auth_user_id: Uuid,
         email: &str,
-    ) -> Result<User, sqlx::Error> {
-        sqlx::query_as::<_, User>(
+        role: UserRole,
+    ) -> Result<Profile, sqlx::Error> {
+        sqlx::query_as::<_, Profile>(
             r#"
-            INSERT INTO users (supabase_uid, email)
-            VALUES ($1, $2)
-            ON CONFLICT (supabase_uid) DO UPDATE SET
+            INSERT INTO profiles (auth_user_id, email, role)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (auth_user_id) DO UPDATE SET
                 email = EXCLUDED.email,
                 updated_at = NOW()
             RETURNING *
             "#,
         )
-        .bind(supabase_uid)
+        .bind(auth_user_id)
         .bind(email)
+        .bind(role)
         .fetch_one(pool)
         .await
     }
 
-    pub async fn update_profile(
+    pub async fn update_locale(
         pool: &PgPool,
-        supabase_uid: Uuid,
-        username: Option<String>,
-        avatar_url: Option<String>,
-    ) -> Result<Option<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
+        auth_user_id: Uuid,
+        locale: String,
+    ) -> Result<Option<Profile>, sqlx::Error> {
+        sqlx::query_as::<_, Profile>(
             r#"
-            UPDATE users SET
-                username = COALESCE($2, username),
-                avatar_url = COALESCE($3, avatar_url),
+            UPDATE profiles SET
+                locale = $2,
                 updated_at = NOW()
-            WHERE supabase_uid = $1
+            WHERE auth_user_id = $1 AND deleted_at IS NULL
             RETURNING *
             "#,
         )
-        .bind(supabase_uid)
-        .bind(username)
-        .bind(avatar_url)
+        .bind(auth_user_id)
+        .bind(locale)
         .fetch_optional(pool)
         .await
+    }
+
+    pub async fn soft_delete(
+        pool: &PgPool,
+        auth_user_id: Uuid,
+    ) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query(
+            r#"
+            UPDATE profiles SET deleted_at = NOW()
+            WHERE auth_user_id = $1 AND deleted_at IS NULL
+            "#,
+        )
+        .bind(auth_user_id)
+        .execute(pool)
+        .await?;
+
+        Ok(result.rows_affected() > 0)
     }
 }

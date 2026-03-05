@@ -1,30 +1,69 @@
-use async_graphql::SimpleObject;
+use async_graphql::{Enum, InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
 use uuid::Uuid;
 
-use super::entity::User;
+use super::entity::{Profile, UserRole};
 
-#[derive(SimpleObject)]
-pub struct UserType {
-    pub id: Uuid,
-    pub supabase_uid: Uuid,
-    pub email: String,
-    pub username: Option<String>,
-    pub avatar_url: Option<String>,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+#[derive(Enum, Copy, Clone, Eq, PartialEq, Debug)]
+pub enum UserRoleType {
+    Patient,
+    Doctor,
+    Admin,
 }
 
-impl From<User> for UserType {
-    fn from(u: User) -> Self {
-        Self {
-            id: u.id,
-            supabase_uid: u.supabase_uid,
-            email: u.email,
-            username: u.username,
-            avatar_url: u.avatar_url,
-            created_at: u.created_at,
-            updated_at: u.updated_at,
+impl From<UserRole> for UserRoleType {
+    fn from(r: UserRole) -> Self {
+        match r {
+            UserRole::Patient => UserRoleType::Patient,
+            UserRole::Doctor => UserRoleType::Doctor,
+            UserRole::Admin => UserRoleType::Admin,
         }
     }
+}
+
+impl From<UserRoleType> for UserRole {
+    fn from(r: UserRoleType) -> Self {
+        match r {
+            UserRoleType::Patient => UserRole::Patient,
+            UserRoleType::Doctor => UserRole::Doctor,
+            UserRoleType::Admin => UserRole::Admin,
+        }
+    }
+}
+
+#[derive(SimpleObject)]
+pub struct ProfileType {
+    pub id: Uuid,
+    pub auth_user_id: Uuid,
+    pub email: String,
+    pub locale: String,
+    pub role: UserRoleType,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub deleted_at: Option<DateTime<Utc>>,
+}
+
+impl From<Profile> for ProfileType {
+    fn from(p: Profile) -> Self {
+        Self {
+            id: p.id,
+            auth_user_id: p.auth_user_id,
+            email: p.email,
+            locale: p.locale,
+            role: p.role.into(),
+            created_at: p.created_at,
+            updated_at: p.updated_at,
+            deleted_at: p.deleted_at,
+        }
+    }
+}
+
+#[derive(InputObject)]
+pub struct SyncProfileInput {
+    pub role: UserRoleType,
+}
+
+#[derive(InputObject)]
+pub struct UpdateProfileInput {
+    pub locale: Option<String>,
 }
