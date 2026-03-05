@@ -1,3 +1,3 @@
 pub mod entity;
-pub mod resolvers;
-pub mod types;
+pub mod resolver;
+pub mod schema;

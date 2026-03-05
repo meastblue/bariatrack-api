@@ -1,7 +1,7 @@
 use async_graphql::{EmptySubscription, MergedObject, Schema};
 use sqlx::PgPool;
 
-use crate::profiles::resolvers::{ProfileMutation, ProfileQuery};
+use crate::profiles::schema::{MutationRoot as ProfileMutation, QueryRoot as ProfileQuery};
 
 // ── Merged Root Types ──────────────────────
 

@@ -1,8 +1,12 @@
+use async_graphql::{Enum, InputObject, SimpleObject};
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, PgPool, Type};
 use uuid::Uuid;
 
-#[derive(Debug, Clone, PartialEq, Type)]
+// ── Enums ──────────────────────────────────
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type, Enum, Copy)]
 #[sqlx(type_name = "user_role", rename_all = "snake_case")]
 pub enum UserRole {
     Patient,
@@ -10,7 +14,9 @@ pub enum UserRole {
     Admin,
 }
 
-#[derive(Debug, Clone, FromRow)]
+// ── Entity ─────────────────────────────────
+
+#[derive(Debug, Clone, Serialize, Deserialize, FromRow, SimpleObject)]
 pub struct Profile {
     pub id: Uuid,
     pub auth_user_id: Uuid,
@@ -35,23 +41,33 @@ impl Profile {
         .await
     }
 
-    pub async fn get_id_by_auth_user_id(
-        pool: &PgPool,
-        auth_user_id: Uuid,
-    ) -> Result<Option<Uuid>, sqlx::Error> {
-        sqlx::query_scalar::<_, Uuid>(
-            "SELECT id FROM profiles WHERE auth_user_id = $1 AND deleted_at IS NULL",
+    pub async fn delete(pool: &PgPool, auth_user_id: Uuid) -> Result<Profile, sqlx::Error> {
+        sqlx::query_as::<_, Profile>(
+            r#"
+            UPDATE profiles SET deleted_at = now()
+            WHERE auth_user_id = $1 AND deleted_at IS NULL
+            RETURNING *
+            "#,
         )
         .bind(auth_user_id)
-        .fetch_optional(pool)
+        .fetch_one(pool)
         .await
     }
+}
 
-    pub async fn upsert(
+// ── Create ─────────────────────────────────
+
+#[derive(Debug, Serialize, Deserialize, InputObject)]
+pub struct SyncProfileInput {
+    pub role: UserRole,
+}
+
+impl SyncProfileInput {
+    pub async fn sync(
         pool: &PgPool,
         auth_user_id: Uuid,
         email: &str,
-        role: UserRole,
+        data: SyncProfileInput,
     ) -> Result<Profile, sqlx::Error> {
         sqlx::query_as::<_, Profile>(
             r#"
@@ -65,45 +81,37 @@ impl Profile {
         )
         .bind(auth_user_id)
         .bind(email)
-        .bind(role)
+        .bind(data.role)
         .fetch_one(pool)
         .await
     }
+}
 
-    pub async fn update_locale(
+// ── Update ─────────────────────────────────
+
+#[derive(Debug, Serialize, Deserialize, InputObject)]
+pub struct UpdateProfileInput {
+    pub locale: Option<String>,
+}
+
+impl UpdateProfileInput {
+    pub async fn update(
         pool: &PgPool,
         auth_user_id: Uuid,
-        locale: String,
-    ) -> Result<Option<Profile>, sqlx::Error> {
+        data: UpdateProfileInput,
+    ) -> Result<Profile, sqlx::Error> {
         sqlx::query_as::<_, Profile>(
             r#"
             UPDATE profiles SET
-                locale = $2,
+                locale = COALESCE($2, locale),
                 updated_at = NOW()
             WHERE auth_user_id = $1 AND deleted_at IS NULL
             RETURNING *
             "#,
         )
         .bind(auth_user_id)
-        .bind(locale)
-        .fetch_optional(pool)
+        .bind(data.locale)
+        .fetch_one(pool)
         .await
-    }
-
-    pub async fn soft_delete(
-        pool: &PgPool,
-        auth_user_id: Uuid,
-    ) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
-            r#"
-            UPDATE profiles SET deleted_at = NOW()
-            WHERE auth_user_id = $1 AND deleted_at IS NULL
-            "#,
-        )
-        .bind(auth_user_id)
-        .execute(pool)
-        .await?;
-
-        Ok(result.rows_affected() > 0)
     }
 }
