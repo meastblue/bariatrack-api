@@ -1,0 +1,6 @@
+name: dev
+variables:
+  - secret: true
+    name: supabase_url
+  - secret: true
+    name: supabase_publishable_key

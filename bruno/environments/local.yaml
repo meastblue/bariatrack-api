@@ -1,8 +1,0 @@
-name: local
-variables:
-  - secret: true
-    name: supabase_url
-  - secret: true
-    name: supabase_anon_key
-  - name: access_token
-    secret: true

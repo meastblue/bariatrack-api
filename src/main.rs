@@ -1,6 +1,7 @@
 mod app;
 mod middlewares;
 mod utils;
+mod profiles;
 
 use app::server::Server;
 use tracing_subscriber::EnvFilter;
