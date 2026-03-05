@@ -29,6 +29,26 @@ pub struct Profile {
 }
 
 impl Profile {
+    /// List all active profiles (admin)
+    pub async fn list(pool: &PgPool) -> Result<Vec<Profile>, sqlx::Error> {
+        sqlx::query_as::<_, Profile>(
+            "SELECT * FROM profiles WHERE deleted_at IS NULL ORDER BY created_at DESC",
+        )
+        .fetch_all(pool)
+        .await
+    }
+
+    /// Get profile by id
+    pub async fn get(pool: &PgPool, id: Uuid) -> Result<Profile, sqlx::Error> {
+        sqlx::query_as::<_, Profile>(
+            "SELECT * FROM profiles WHERE id = $1 AND deleted_at IS NULL",
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Get profile by Supabase auth_user_id
     pub async fn find_by_auth_user_id(
         pool: &PgPool,
         auth_user_id: Uuid,
@@ -41,17 +61,27 @@ impl Profile {
         .await
     }
 
-    pub async fn delete(pool: &PgPool, auth_user_id: Uuid) -> Result<Profile, sqlx::Error> {
+    /// Soft delete (RGPD — garde la trace)
+    pub async fn delete(pool: &PgPool, id: Uuid) -> Result<Profile, sqlx::Error> {
         sqlx::query_as::<_, Profile>(
             r#"
             UPDATE profiles SET deleted_at = now()
-            WHERE auth_user_id = $1 AND deleted_at IS NULL
+            WHERE id = $1 AND deleted_at IS NULL
             RETURNING *
             "#,
         )
-        .bind(auth_user_id)
+        .bind(id)
         .fetch_one(pool)
         .await
+    }
+
+    /// Hard delete (RGPD — suppression définitive)
+    pub async fn destroy(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
+        sqlx::query("DELETE FROM profiles WHERE id = $1")
+            .bind(id)
+            .execute(pool)
+            .await?;
+        Ok(())
     }
 }
 
@@ -63,6 +93,7 @@ pub struct SyncProfileInput {
 }
 
 impl SyncProfileInput {
+    /// Upsert profile depuis Supabase Auth (appelé au premier login)
     pub async fn sync(
         pool: &PgPool,
         auth_user_id: Uuid,
@@ -97,7 +128,7 @@ pub struct UpdateProfileInput {
 impl UpdateProfileInput {
     pub async fn update(
         pool: &PgPool,
-        auth_user_id: Uuid,
+        id: Uuid,
         data: UpdateProfileInput,
     ) -> Result<Profile, sqlx::Error> {
         sqlx::query_as::<_, Profile>(
@@ -105,11 +136,11 @@ impl UpdateProfileInput {
             UPDATE profiles SET
                 locale = COALESCE($2, locale),
                 updated_at = NOW()
-            WHERE auth_user_id = $1 AND deleted_at IS NULL
+            WHERE id = $1 AND deleted_at IS NULL
             RETURNING *
             "#,
         )
-        .bind(auth_user_id)
+        .bind(id)
         .bind(data.locale)
         .fetch_one(pool)
         .await
