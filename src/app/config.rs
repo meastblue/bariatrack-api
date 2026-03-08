@@ -19,6 +19,7 @@ pub struct Config {
     pub server_host: String,
     pub server_port: u16,
     pub supabase_url: String,
+    pub supabase_service_key: String,
 }
 
 impl Config {
@@ -43,6 +44,8 @@ impl Config {
             .parse()?;
         let supabase_url = env::var("SUPABASE_URL")
             .map_err(|_| ConfigError::MissingEnvVar("SUPABASE_URL".into()))?;
+        let supabase_service_key = env::var("SUPABASE_SECRET_KEY")
+            .map_err(|_| ConfigError::MissingEnvVar("SUPABASE_SECRET_KEY".into()))?;
 
         Ok(Config {
             db_host,
@@ -53,6 +56,7 @@ impl Config {
             server_host,
             server_port,
             supabase_url,
+            supabase_service_key,
         })
     }
 

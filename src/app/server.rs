@@ -49,7 +49,7 @@ impl Server {
     }
 
     pub async fn run(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let app = config_routes(&self.pool, self.decoding_key.clone()).layer(cors_middleware());
+        let app = config_routes(&self.pool, self.decoding_key.clone(), self.config.supabase_url.clone(), self.config.supabase_service_key.clone()).layer(cors_middleware());
         let addr: SocketAddr =
             format!("{}:{}", self.config.server_host, self.config.server_port).parse()?;
         let listener = TcpListener::bind(addr).await?;

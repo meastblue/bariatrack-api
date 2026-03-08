@@ -13,8 +13,8 @@ use axum::{
 use jsonwebtoken::DecodingKey;
 use sqlx::PgPool;
 
-pub fn config_routes(pool: &PgPool, decoding_key: DecodingKey) -> Router {
-    let schema = build_schema(pool);
+pub fn config_routes(pool: &PgPool, decoding_key: DecodingKey, supabase_url: String, supabase_service_key: String) -> Router {
+    let schema = build_schema(pool, supabase_url, supabase_service_key);
 
     let public = Router::new()
         .route("/", get(|| async { "BariaTrack API 🏥" }))
@@ -40,4 +40,9 @@ async fn graphql_handler(
 ) -> GraphQLResponse {
     let request = req.into_inner().data(claims);
     schema.execute(request).await.into()
+}
+
+pub struct SupabaseAdmin {
+    pub url: String,
+    pub service_key: String,
 }

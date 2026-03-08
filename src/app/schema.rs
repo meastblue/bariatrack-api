@@ -61,12 +61,13 @@ impl HealthMutation {
 
 pub type AppSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
 
-pub fn build_schema(pool: &PgPool) -> AppSchema {
+pub fn build_schema(pool: &PgPool, supabase_url: String, supabase_service_key: String) -> AppSchema {
     Schema::build(
         QueryRoot::default(),
         MutationRoot::default(),
         EmptySubscription,
     )
     .data(pool.clone())
+    .data(crate::app::routes::SupabaseAdmin { url: supabase_url, service_key: supabase_service_key })
     .finish()
 }

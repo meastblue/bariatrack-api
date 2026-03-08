@@ -1,8 +1,10 @@
 use async_graphql::Context;
+use reqwest::Client;
 use sqlx::PgPool;
 use uuid::Uuid;
 
 use super::entity::{Profile, SyncProfileInput, UpdateProfileInput};
+use crate::app::routes::SupabaseAdmin;
 use crate::utils::auth::Claims;
 
 fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
@@ -94,10 +96,34 @@ impl ProfileMutation {
     }
 
     /// Hard delete profile — suppression définitive (RGPD purge)
+    /// Supprime dans notre DB ET dans Supabase Auth
     async fn destroy_profile(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<bool> {
         let _claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
+        let admin = ctx.data::<SupabaseAdmin>()?;
+
+        // Récupérer le auth_uid avant suppression
+        let profile = Profile::get(pool, id).await?;
+        let auth_uid = profile.auth_uid;
+
+        // Supprimer dans notre DB
         Profile::destroy(pool, id).await?;
+
+        // Supprimer dans Supabase Auth
+        let url = format!("{}/auth/v1/admin/users/{}", admin.url, auth_uid);
+        let res = Client::new()
+            .delete(&url)
+            .header("apikey", &admin.service_key)
+            .header("Authorization", format!("Bearer {}", admin.service_key))
+            .send()
+            .await
+            .map_err(|e| format!("Supabase Admin API error: {e}"))?;
+
+        if !res.status().is_success() {
+            let body = res.text().await.unwrap_or_default();
+            return Err(format!("Supabase delete user failed: {body}").into());
+        }
+
         Ok(true)
     }
 }
