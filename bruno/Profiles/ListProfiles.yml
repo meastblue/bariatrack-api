@@ -12,14 +12,23 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
-      {
-        "query": "query ListProfiles($includeDeleted: Boolean) { listProfiles(includeDeleted: $includeDeleted) { id authUserId email role locale createdAt updatedAt deletedAt } }",
-        "variables": {
-          "includeDeleted": false
+    type: graphql
+    data:
+      query: |-
+        query ListProfiles($includeDeleted: Boolean) {
+          listProfiles(includeDeleted: $includeDeleted) {
+            id
+            authUserId
+            email
+            role
+            locale
+            createdAt
+            updatedAt
+            deletedAt
+          }
         }
-      }
+      variables:
+        includeDeleted: false
   auth: inherit
 
 settings:

@@ -12,14 +12,23 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
-      {
-        "query": "query GetProfile($id: UUID!) { getProfile(id: $id) { id authUserId email role locale createdAt updatedAt deletedAt } }",
-        "variables": {
-          "id": "{{profile_id}}"
+    type: graphql
+    data:
+      query: |-
+        query GetProfile($id: UUID!) {
+          getProfile(id: $id) {
+            id
+            authUserId
+            email
+            role
+            locale
+            createdAt
+            updatedAt
+            deletedAt
+          }
         }
-      }
+      variables:
+        id: "{{profile_id}}"
   auth: inherit
 
 settings:

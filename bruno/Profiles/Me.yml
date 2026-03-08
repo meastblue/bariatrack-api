@@ -12,11 +12,19 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
-      {
-        "query": "query Me { me { id email role locale createdAt updatedAt } }"
-      }
+    type: graphql
+    data:
+      query: |-
+        query Me {
+          me {
+            id
+            email
+            role
+            locale
+            createdAt
+            updatedAt
+          }
+        }
   auth: inherit
 
 settings:

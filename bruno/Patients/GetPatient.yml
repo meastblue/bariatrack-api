@@ -12,14 +12,30 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
-      {
-        "query": "query GetPatient($id: UUID!) { patient(id: $id) { id profileId surgeryType surgeryDate initialWeightKg targetWeightKg heightCm dateOfBirth gender bloodType primaryDoctorId allergies notes createdAt updatedAt } }",
-        "variables": {
-          "id": "{{patient_id}}"
+    type: graphql
+    data:
+      query: |-
+        query GetPatient($id: UUID!) {
+          patient(id: $id) {
+            id
+            profileId
+            surgeryType
+            surgeryDate
+            initialWeightKg
+            targetWeightKg
+            heightCm
+            dateOfBirth
+            gender
+            bloodType
+            primaryDoctorId
+            allergies
+            notes
+            createdAt
+            updatedAt
+          }
         }
-      }
+      variables:
+        id: "{{patient_id}}"
   auth: inherit
 
 settings:

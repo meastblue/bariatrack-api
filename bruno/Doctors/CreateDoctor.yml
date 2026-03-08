@@ -12,20 +12,28 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
-      {
-        "query": "mutation CreateDoctor($data: CreateDoctorInput!) { createDoctor(data: $data) { id profileId specialty licenseNumber hospitalName phoneProfessional timezone isVerified createdAt } }",
-        "variables": {
-          "data": {
-            "specialty": "chirurgie_bariatrique",
-            "licenseNumber": "10012345678",
-            "hospitalName": "Hôpital Lariboisière",
-            "phoneProfessional": "+33612345678",
-            "timezone": "Europe/Paris"
+    type: graphql
+    data:
+      query: |-
+        mutation CreateDoctor($data: CreateDoctorInput!) {
+          createDoctor(data: $data) {
+            id
+            profileId
+            specialty
+            licenseNumber
+            hospitalName
+            timezone
+            isVerified
+            createdAt
           }
         }
-      }
+      variables:
+        data:
+          specialty: "chirurgie_bariatrique"
+          licenseNumber: "10012345678"
+          hospitalName: "Hôpital Lariboisière"
+          phoneProfessional: "+33612345678"
+          timezone: "Europe/Paris"
   auth: inherit
 
 settings:

@@ -12,11 +12,17 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
-      {
-        "query": "query VerifiedDoctors { verifiedDoctors { id specialty hospitalName timezone } }"
-      }
+    type: graphql
+    data:
+      query: |-
+        query VerifiedDoctors {
+          verifiedDoctors {
+            id
+            specialty
+            hospitalName
+            timezone
+          }
+        }
   auth: inherit
 
 settings:
