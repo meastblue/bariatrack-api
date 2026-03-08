@@ -19,5 +19,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { myPatient } = res.body.data;
+        if (myPatient) bru.setVar("patient_id", myPatient.id);
+
 settings:
   encodeUrl: true
