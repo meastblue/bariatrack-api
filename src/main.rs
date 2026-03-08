@@ -1,7 +1,8 @@
 mod app;
 mod middlewares;
-mod utils;
+mod patients;
 mod profiles;
+mod utils;
 
 use app::server::Server;
 use tracing_subscriber::EnvFilter;
