@@ -1,0 +1,30 @@
+info:
+  name: UpdateNotificationPreference
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation UpdateNotificationPreference($notifType: NotificationType!, $data: UpdatePreferenceInput!) { updateNotificationPreference(notifType: $notifType, data: $data) { id notifType enabled periods updatedAt } }",
+        "variables": {
+          "notifType": "{{notif_type}}",
+          "data": {
+            "enabled": true,
+            "periods": ["MORNING", "EVENING"]
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

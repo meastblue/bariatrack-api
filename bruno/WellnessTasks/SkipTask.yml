@@ -1,0 +1,26 @@
+info:
+  name: SkipTask
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation SkipTask($id: UUID!) { skipTask(id: $id) { id status } }",
+        "variables": {
+          "id": "{{patient_task_id}}"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

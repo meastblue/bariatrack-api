@@ -1,0 +1,27 @@
+info:
+  name: CompleteTask
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation CompleteTask($id: UUID!, $note: String) { completeTask(id: $id, note: $note) { id status completedAt note } }",
+        "variables": {
+          "id": "{{patient_task_id}}",
+          "note": "Terminé avec succès"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

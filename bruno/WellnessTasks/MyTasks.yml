@@ -1,0 +1,26 @@
+info:
+  name: MyTasks
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MyTasks($date: String) { myTasks(date: $date) { id taskId patientId status assignedAt completedAt note createdAt } }",
+        "variables": {
+          "date": "2026-03-08"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

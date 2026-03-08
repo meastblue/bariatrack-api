@@ -1,0 +1,26 @@
+info:
+  name: MarkNotificationRead
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation MarkNotificationRead($id: UUID!) { markNotificationRead(id: $id) { id isRead title body createdAt } }",
+        "variables": {
+          "id": "{{notification_id}}"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

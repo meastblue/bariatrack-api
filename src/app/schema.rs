@@ -10,6 +10,10 @@ use crate::patients::schema::{PatientMutation, PatientQuery};
 use crate::profiles::schema::{ProfileMutation, ProfileQuery};
 use crate::supplements::schema::{SupplementMutation, SupplementQuery};
 use crate::weights::schema::{WeightMutation, WeightQuery};
+use crate::diet_phases::schema::{DietPhaseMutation, DietPhaseQuery};
+use crate::wellness_tasks::schema::{WellnessTaskMutation, WellnessTaskQuery};
+use crate::documents::schema::{DocumentMutation, DocumentQuery};
+use crate::notifications::schema::{NotificationMutation, NotificationQuery};
 
 // ── Merged Root Types ──────────────────────
 
@@ -25,6 +29,10 @@ pub struct QueryRoot(
     pub HydrationQuery,
     pub AppointmentQuery,
     pub SupplementQuery,
+    pub DietPhaseQuery,
+    pub WellnessTaskQuery,
+    pub DocumentQuery,
+    pub NotificationQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -39,6 +47,10 @@ pub struct MutationRoot(
     pub HydrationMutation,
     pub AppointmentMutation,
     pub SupplementMutation,
+    pub DietPhaseMutation,
+    pub WellnessTaskMutation,
+    pub DocumentMutation,
+    pub NotificationMutation,
 );
 
 // ── Health (infra) ─────────────────────────

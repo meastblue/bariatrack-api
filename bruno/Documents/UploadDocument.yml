@@ -1,0 +1,38 @@
+info:
+  name: UploadDocument
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation UploadDocument($data: CreateDocumentInput!) { uploadDocument(data: $data) { id patientId uploadedBy title fileUrl fileType uploadedAt } }",
+        "variables": {
+          "data": {
+            "patientId": "{{patient_id}}",
+            "title": "Ordonnance de suivi",
+            "fileUrl": "https://storage.example.com/documents/prescription.pdf",
+            "fileType": "PRESCRIPTION"
+          }
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { uploadDocument } = res.body.data;
+        if (uploadDocument) bru.setVar("document_id", uploadDocument.id);
+
+settings:
+  encodeUrl: true

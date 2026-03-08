@@ -1,0 +1,26 @@
+info:
+  name: PatientDocuments
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query PatientDocuments($patientId: UUID!) { patientDocuments(patientId: $patientId) { id patientId uploadedBy title description fileUrl fileType mimeType fileSizeBytes uploadedAt } }",
+        "variables": {
+          "patientId": "{{patient_id}}"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

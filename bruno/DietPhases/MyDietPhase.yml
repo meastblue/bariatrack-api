@@ -1,0 +1,24 @@
+info:
+  name: MyDietPhase
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MyDietPhase { myDietPhase { id phaseId patientId status startedAt endedAt createdAt } }",
+        "variables": {}
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

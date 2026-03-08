@@ -10,6 +10,10 @@ mod profiles;
 mod utils;
 mod supplements;
 mod weights;
+mod diet_phases;
+mod wellness_tasks;
+mod documents;
+mod notifications;
 
 use app::server::Server;
 use tracing_subscriber::EnvFilter;

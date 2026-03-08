@@ -1,0 +1,28 @@
+info:
+  name: AssignDietPhase
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation AssignDietPhase($patientId: UUID!, $phaseId: UUID!, $startedAt: String) { assignDietPhase(patientId: $patientId, phaseId: $phaseId, startedAt: $startedAt) { id patientId phaseId status startedAt createdAt } }",
+        "variables": {
+          "patientId": "{{patient_id}}",
+          "phaseId": "{{diet_phase_id}}",
+          "startedAt": "2026-03-08"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

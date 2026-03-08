@@ -1,0 +1,24 @@
+info:
+  name: DietPhases
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query DietPhases { dietPhases { id name phaseOrder description durationDays allowedFoods forbiddenFoods } }",
+        "variables": {}
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

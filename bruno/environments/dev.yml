@@ -39,9 +39,21 @@ variables:
   - name: supplement_log_id
     value: ""
     secret: false
-  - name: supplement_id
+  - name: diet_phase_id
     value: ""
     secret: false
-  - name: supplement_log_id
+  - name: task_id
     value: ""
+    secret: false
+  - name: patient_task_id
+    value: ""
+    secret: false
+  - name: document_id
+    value: ""
+    secret: false
+  - name: notification_id
+    value: ""
+    secret: false
+  - name: notif_type
+    value: "HYDRATION_REMINDER"
     secret: false
