@@ -19,5 +19,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.body;
+        bru.setVar("profile_id", data.data.me.id);
+
 settings:
   encodeUrl: true
