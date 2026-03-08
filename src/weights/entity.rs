@@ -21,19 +21,24 @@ pub struct Weight {
     pub id: Uuid,
     pub patient_id: Uuid,
     pub weight_kg: f64,
+    /// Différence avec la mesure précédente (+ = gain, - = perte). Null si première mesure.
+    pub delta_kg: Option<f64>,
     pub measured_at: NaiveDate,
     pub source: EntrySource,
     pub note: Option<String>,
     pub created_at: DateTime<Utc>,
 }
 
-const SELECT: &str = r#"
+/// SELECT avec delta calculé via LAG()
+const SELECT_WITH_DELTA: &str = r#"
     SELECT
         id, patient_id,
         weight_kg::float8 AS weight_kg,
+        (weight_kg - LAG(weight_kg) OVER (PARTITION BY patient_id ORDER BY measured_at))::float8 AS delta_kg,
         measured_at, source, note, created_at
     FROM weights
 "#;
+
 
 impl Weight {
     pub async fn list_by_patient(
@@ -42,9 +47,15 @@ impl Weight {
         limit: i64,
         offset: i64,
     ) -> Result<Vec<Weight>, sqlx::Error> {
+        // Subquery pour pouvoir paginer après le calcul du delta
         let q = format!(
-            "{} WHERE patient_id = $1 ORDER BY measured_at DESC LIMIT $2 OFFSET $3",
-            SELECT
+            r#"
+            SELECT * FROM ({}) w
+            WHERE patient_id = $1
+            ORDER BY measured_at DESC
+            LIMIT $2 OFFSET $3
+            "#,
+            SELECT_WITH_DELTA
         );
         sqlx::query_as::<_, Weight>(&q)
             .bind(patient_id)
@@ -55,11 +66,24 @@ impl Weight {
     }
 
     pub async fn get(pool: &PgPool, id: Uuid) -> Result<Weight, sqlx::Error> {
-        let q = format!("{} WHERE id = $1", SELECT);
-        sqlx::query_as::<_, Weight>(&q)
-            .bind(id)
-            .fetch_one(pool)
-            .await
+        // Pour un get unique, on calcule le delta avec la mesure précédente
+        sqlx::query_as::<_, Weight>(
+            r#"
+            SELECT
+                id, patient_id,
+                weight_kg::float8 AS weight_kg,
+                (weight_kg - LAG(weight_kg) OVER (PARTITION BY patient_id ORDER BY measured_at))::float8 AS delta_kg,
+                measured_at, source, note, created_at
+            FROM weights
+            WHERE patient_id = (SELECT patient_id FROM weights WHERE id = $1)
+            "#,
+        )
+        .bind(id)
+        .fetch_all(pool)
+        .await?
+        .into_iter()
+        .find(|w: &Weight| w.id == id)
+        .ok_or(sqlx::Error::RowNotFound)
     }
 
     pub async fn delete(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
@@ -87,7 +111,8 @@ impl LogWeightInput {
         patient_id: Uuid,
         data: LogWeightInput,
     ) -> Result<Weight, sqlx::Error> {
-        sqlx::query_as::<_, Weight>(
+        // Upsert puis récupère avec delta calculé
+        let inserted = sqlx::query_scalar::<_, Uuid>(
             r#"
             INSERT INTO weights (patient_id, weight_kg, measured_at, source, note)
             VALUES ($1, $2, $3, $4, $5)
@@ -95,10 +120,7 @@ impl LogWeightInput {
                 weight_kg = EXCLUDED.weight_kg,
                 source    = EXCLUDED.source,
                 note      = EXCLUDED.note
-            RETURNING
-                id, patient_id,
-                weight_kg::float8 AS weight_kg,
-                measured_at, source, note, created_at
+            RETURNING id
             "#,
         )
         .bind(patient_id)
@@ -107,6 +129,8 @@ impl LogWeightInput {
         .bind(data.source.unwrap_or(EntrySource::Manual))
         .bind(data.note)
         .fetch_one(pool)
-        .await
+        .await?;
+
+        Weight::get(pool, inserted).await
     }
 }
