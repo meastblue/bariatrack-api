@@ -30,7 +30,7 @@ pub struct JwkKey {
     pub crv: Option<String>,
     pub x: Option<String>,
     pub y: Option<String>,
-    pub alg: Option<String>,
+
 }
 
 /// Fetch the JWKS from Supabase and build a DecodingKey for ES256
@@ -71,4 +71,38 @@ pub fn extract_bearer_token(header: &str) -> Option<&str> {
     header
         .strip_prefix("Bearer ")
         .or_else(|| header.strip_prefix("bearer "))
+}
+
+// ── RBAC helper ────────────────────────────
+
+use crate::profiles::entity::{Profile, UserRole};
+use async_graphql::Context;
+use sqlx::PgPool;
+
+/// Vérifie que l'utilisateur connecté a le rôle requis.
+/// Retourne son Profile si OK, erreur sinon.
+pub async fn require_role(
+    ctx: &Context<'_>,
+    required: UserRole,
+) -> async_graphql::Result<Profile> {
+    let claims = ctx
+        .data::<Claims>()
+        .map_err(|_| "Unauthorized")?
+        .clone();
+    let pool = ctx.data::<PgPool>()?;
+    let auth_uid = claims.supabase_uid().map_err(|_| "Invalid auth user ID")?;
+    let profile = Profile::find_by_auth_uid(pool, auth_uid)
+        .await?
+        .ok_or("Profile not found")?;
+
+    let ok = match required {
+        UserRole::Admin => profile.role == UserRole::Admin,
+        UserRole::Doctor => matches!(profile.role, UserRole::Doctor | UserRole::Admin),
+        UserRole::Patient => true, // tout utilisateur authentifié
+    };
+
+    if !ok {
+        return Err("Forbidden: insufficient role".into());
+    }
+    Ok(profile)
 }
