@@ -81,45 +81,51 @@ pub struct DoctorPatientMutation;
 
 #[async_graphql::Object]
 impl DoctorPatientMutation {
-    /// Assigner un médecin à un patient — admin ou doctor
-    async fn assign_doctor(
+    /// Le médecin connecté s'assigne un patient
+    async fn assign_patient(
         &self,
         ctx: &Context<'_>,
-        doctor_id: Uuid,
         patient_id: Uuid,
     ) -> async_graphql::Result<DoctorPatient> {
-        require_role(ctx, UserRole::Doctor).await?;
+        let profile = require_role(ctx, UserRole::Doctor).await?;
         let pool = ctx.data::<PgPool>()?;
-        let relation = DoctorPatient::assign(pool, doctor_id, patient_id).await?;
+        let doctor = Doctor::find_by_profile_id(pool, profile.id)
+            .await?
+            .ok_or("Doctor profile not found")?;
+        let relation = DoctorPatient::assign(pool, doctor.id, patient_id).await?;
         Ok(relation)
     }
 
-    /// Désassigner un médecin d'un patient — admin ou doctor
-    async fn unassign_doctor(
+    /// Le médecin connecté retire un patient de son suivi
+    async fn unassign_patient(
         &self,
         ctx: &Context<'_>,
-        doctor_id: Uuid,
         patient_id: Uuid,
     ) -> async_graphql::Result<DoctorPatient> {
-        require_role(ctx, UserRole::Doctor).await?;
+        let profile = require_role(ctx, UserRole::Doctor).await?;
         let pool = ctx.data::<PgPool>()?;
-        let relation = DoctorPatient::unassign(pool, doctor_id, patient_id).await?;
+        let doctor = Doctor::find_by_profile_id(pool, profile.id)
+            .await?
+            .ok_or("Doctor profile not found")?;
+        let relation = DoctorPatient::unassign(pool, doctor.id, patient_id).await?;
         Ok(relation)
     }
 
-    /// Transférer un patient vers un autre médecin — admin ou doctor
+    /// Transférer un patient vers un autre médecin — le médecin connecté ou admin
     async fn transfer_patient(
         &self,
         ctx: &Context<'_>,
         patient_id: Uuid,
-        old_doctor_id: Uuid,
         new_doctor_id: Uuid,
         note: Option<String>,
     ) -> async_graphql::Result<DoctorPatient> {
-        require_role(ctx, UserRole::Doctor).await?;
+        let profile = require_role(ctx, UserRole::Doctor).await?;
         let pool = ctx.data::<PgPool>()?;
+        let doctor = Doctor::find_by_profile_id(pool, profile.id)
+            .await?
+            .ok_or("Doctor profile not found")?;
         let relation =
-            DoctorPatient::transfer(pool, patient_id, old_doctor_id, new_doctor_id, note).await?;
+            DoctorPatient::transfer(pool, patient_id, doctor.id, new_doctor_id, note).await?;
         Ok(relation)
     }
 }

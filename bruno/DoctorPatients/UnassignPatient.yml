@@ -1,7 +1,7 @@
 info:
-  name: AssignDoctor
+  name: UnassignPatient
   type: http
-  seq: 2
+  seq: 3
 
 http:
   method: POST
@@ -15,9 +15,8 @@ http:
     type: json
     data: |-
       {
-        "query": "mutation AssignDoctor($doctorId: UUID!, $patientId: UUID!) { assignDoctor(doctorId: $doctorId, patientId: $patientId) { id doctorId patientId status assignedAt } }",
+        "query": "mutation UnassignPatient($patientId: UUID!) { unassignPatient(patientId: $patientId) { id doctorId patientId status endedAt } }",
         "variables": {
-          "doctorId": "{{doctor_id}}",
           "patientId": "{{patient_id}}"
         }
       }

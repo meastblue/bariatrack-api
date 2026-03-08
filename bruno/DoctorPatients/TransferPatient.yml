@@ -15,12 +15,11 @@ http:
     type: json
     data: |-
       {
-        "query": "mutation TransferPatient($patientId: UUID!, $oldDoctorId: UUID!, $newDoctorId: UUID!, $note: String) { transferPatient(patientId: $patientId, oldDoctorId: $oldDoctorId, newDoctorId: $newDoctorId, note: $note) { id doctorId patientId status assignedAt transferNote } }",
+        "query": "mutation TransferPatient($patientId: UUID!, $newDoctorId: UUID!, $note: String) { transferPatient(patientId: $patientId, newDoctorId: $newDoctorId, note: $note) { id doctorId patientId status assignedAt transferNote } }",
         "variables": {
           "patientId": "{{patient_id}}",
-          "oldDoctorId": "{{old_doctor_id}}",
-          "newDoctorId": "{{new_doctor_id}}",
-          "note": "Transfer to new specialist"
+          "newDoctorId": "{{doctor_id}}",
+          "note": "Transfert de suivi"
         }
       }
   auth: inherit
