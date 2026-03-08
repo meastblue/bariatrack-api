@@ -102,8 +102,8 @@ impl ProfileMutation {
         let pool = ctx.data::<PgPool>()?;
         let admin = ctx.data::<SupabaseAdmin>()?;
 
-        // Récupérer le auth_uid avant suppression
-        let profile = Profile::get(pool, id).await
+        // Récupérer le auth_uid avant suppression (inclut les soft-deleted)
+        let profile = Profile::get_any(pool, id).await
             .map_err(|_| format!("Profile {} not found", id))?;
         let auth_uid = profile.auth_uid;
 

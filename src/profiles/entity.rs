@@ -39,9 +39,17 @@ impl Profile {
         sqlx::query_as::<_, Profile>(query).fetch_all(pool).await
     }
 
-    /// Get profile by id
+    /// Get profile by id (actif uniquement)
     pub async fn get(pool: &PgPool, id: Uuid) -> Result<Profile, sqlx::Error> {
         sqlx::query_as::<_, Profile>("SELECT * FROM profiles WHERE id = $1 AND deleted_at IS NULL")
+            .bind(id)
+            .fetch_one(pool)
+            .await
+    }
+
+    /// Get profile by id (inclut les soft-deleted — pour destroy RGPD)
+    pub async fn get_any(pool: &PgPool, id: Uuid) -> Result<Profile, sqlx::Error> {
+        sqlx::query_as::<_, Profile>("SELECT * FROM profiles WHERE id = $1")
             .bind(id)
             .fetch_one(pool)
             .await
