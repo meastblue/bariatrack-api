@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    mode: json
-    json: |
+    type: json
+    data: |
       {
         "query": "query GetDoctor($id: UUID!) { doctor(id: $id) { id profileId specialty licenseNumber hospitalName phoneProfessional timezone isVerified createdAt updatedAt } }",
         "variables": {
