@@ -23,8 +23,8 @@ runtime:
   scripts:
     - type: after-response
       code: |-
-        const data = res.body;
-        bru.setVar("profile_id", data.data.me.id);
+        const { me } = res.body.data;
+        bru.setVar("profile_id", me.id);
 
 settings:
   encodeUrl: true
