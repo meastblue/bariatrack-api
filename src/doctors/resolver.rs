@@ -46,7 +46,7 @@ impl DoctorQuery {
         let pool = ctx.data::<PgPool>()?;
         let auth_user_id = claims.supabase_uid().map_err(|_| "Invalid auth user ID")?;
 
-        let profile = Profile::find_by_auth_user_id(pool, auth_user_id)
+        let profile = Profile::find_by_auth_uid(pool, auth_user_id)
             .await?
             .ok_or("Profile not found. Call syncProfile first.")?;
 
@@ -72,7 +72,7 @@ impl DoctorMutation {
         let pool = ctx.data::<PgPool>()?;
         let auth_user_id = claims.supabase_uid().map_err(|_| "Invalid auth user ID")?;
 
-        let profile = Profile::find_by_auth_user_id(pool, auth_user_id)
+        let profile = Profile::find_by_auth_uid(pool, auth_user_id)
             .await?
             .ok_or("Profile not found. Call syncProfile first.")?;
 

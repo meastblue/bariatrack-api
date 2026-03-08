@@ -19,7 +19,7 @@ pub enum UserRole {
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow, SimpleObject)]
 pub struct Profile {
     pub id: Uuid,
-    pub auth_user_id: Uuid,
+    pub auth_uid: Uuid,
     pub email: String,
     pub locale: String,
     pub role: UserRole,
@@ -47,15 +47,15 @@ impl Profile {
             .await
     }
 
-    /// Get profile by Supabase auth_user_id
-    pub async fn find_by_auth_user_id(
+    /// Get profile by Supabase auth_uid
+    pub async fn find_by_auth_uid(
         pool: &PgPool,
-        auth_user_id: Uuid,
+        auth_uid: Uuid,
     ) -> Result<Option<Profile>, sqlx::Error> {
         sqlx::query_as::<_, Profile>(
-            "SELECT * FROM profiles WHERE auth_user_id = $1 AND deleted_at IS NULL",
+            "SELECT * FROM profiles WHERE auth_uid = $1 AND deleted_at IS NULL",
         )
-        .bind(auth_user_id)
+        .bind(auth_uid)
         .fetch_optional(pool)
         .await
     }
@@ -95,21 +95,21 @@ impl SyncProfileInput {
     /// Upsert profile depuis Supabase Auth (appelé au premier login)
     pub async fn sync(
         pool: &PgPool,
-        auth_user_id: Uuid,
+        auth_uid: Uuid,
         email: &str,
         data: SyncProfileInput,
     ) -> Result<Profile, sqlx::Error> {
         sqlx::query_as::<_, Profile>(
             r#"
-            INSERT INTO profiles (auth_user_id, email, role)
+            INSERT INTO profiles (auth_uid, email, role)
             VALUES ($1, $2, $3)
-            ON CONFLICT (auth_user_id) DO UPDATE SET
+            ON CONFLICT (auth_uid) DO UPDATE SET
                 email = EXCLUDED.email,
                 updated_at = NOW()
             RETURNING *
             "#,
         )
-        .bind(auth_user_id)
+        .bind(auth_uid)
         .bind(email)
         .bind(data.role)
         .fetch_one(pool)

@@ -15,7 +15,7 @@ http:
     type: json
     data: |-
       {
-        "query": "query ListProfiles($includeDeleted: Boolean) { listProfiles(includeDeleted: $includeDeleted) { id authUserId email role locale createdAt updatedAt deletedAt } }",
+        "query": "query ListProfiles($includeDeleted: Boolean) { listProfiles(includeDeleted: $includeDeleted) { id authUid email role locale createdAt updatedAt deletedAt } }",
         "variables": { "includeDeleted": false }
       }
   auth: inherit
