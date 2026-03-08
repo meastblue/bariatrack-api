@@ -3,6 +3,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use super::entity::{CreateDoctorInput, Doctor, UpdateDoctorInput};
+use crate::patients::entity::Patient;
 use crate::profiles::entity::{Profile, UserRole};
 use crate::utils::auth::{require_role, Claims};
 
@@ -39,6 +40,32 @@ impl DoctorQuery {
         let pool = ctx.data::<PgPool>()?;
         let doctor = Doctor::get(pool, id).await?;
         Ok(doctor)
+    }
+
+    /// Liste les médecins du patient connecté (via doctor_patients)
+    async fn my_doctors(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<Doctor>> {
+        let profile = require_role(ctx, UserRole::Patient).await?;
+        let pool = ctx.data::<PgPool>()?;
+
+        let patient = Patient::find_by_profile_id(pool, profile.id)
+            .await?
+            .ok_or("Patient profile not found")?;
+
+        let doctors = sqlx::query_as::<_, Doctor>(
+            r#"
+            SELECT d.* FROM doctors d
+            INNER JOIN doctor_patients dp ON dp.doctor_id = d.id
+            WHERE dp.patient_id = $1
+              AND dp.status = 'active'
+              AND d.deleted_at IS NULL
+            ORDER BY dp.assigned_at DESC
+            "#,
+        )
+        .bind(patient.id)
+        .fetch_all(pool)
+        .await?;
+
+        Ok(doctors)
     }
 
     /// Récupère le profil médecin de l'utilisateur connecté
