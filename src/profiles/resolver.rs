@@ -22,7 +22,7 @@ impl QueryRoot {
     async fn list_profiles(
         &self,
         ctx: &Context<'_>,
-        include_deleted: bool,
+        #[graphql(default = false)] include_deleted: bool,
     ) -> async_graphql::Result<Vec<Profile>> {
         let pool = ctx.data::<PgPool>()?;
         let profiles = Profile::list(pool, include_deleted).await?;
