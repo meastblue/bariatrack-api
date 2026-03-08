@@ -86,11 +86,24 @@ impl PatientMutation {
         Ok(patient)
     }
 
-    /// Supprime un patient (hard delete)
-    async fn delete_patient(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<bool> {
+    /// Soft delete — marque deleted_at
+    async fn delete_patient(
+        &self,
+        ctx: &Context<'_>,
+        id: Uuid,
+    ) -> async_graphql::Result<Patient> {
         let _claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
-        Patient::delete(pool, id).await?;
+        let patient = Patient::soft_delete(pool, id).await?;
+        Ok(patient)
+    }
+
+    /// Hard delete — suppression définitive (RGPD)
+    async fn destroy_patient(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<bool> {
+        let _claims = get_claims(ctx)?;
+        let pool = ctx.data::<PgPool>()?;
+        Patient::get_any(pool, id).await?;
+        Patient::destroy(pool, id).await?;
         Ok(true)
     }
 }

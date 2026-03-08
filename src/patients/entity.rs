@@ -67,6 +67,7 @@ pub struct Patient {
     pub notes: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 // Requête SELECT explicite avec cast NUMERIC → float8
@@ -78,19 +79,28 @@ const SELECT: &str = r#"
         height_cm::float8         AS height_cm,
         date_of_birth, gender, blood_type,
         primary_doctor_id, allergies, notes,
-        created_at, updated_at
+        created_at, updated_at, deleted_at
     FROM patients
 "#;
 
 impl Patient {
-    /// Liste tous les patients (admin)
+    /// Liste tous les patients non supprimés (admin)
     pub async fn list(pool: &PgPool) -> Result<Vec<Patient>, sqlx::Error> {
-        let q = format!("{} ORDER BY created_at DESC", SELECT);
+        let q = format!("{} WHERE deleted_at IS NULL ORDER BY created_at DESC", SELECT);
         sqlx::query_as::<_, Patient>(&q).fetch_all(pool).await
     }
 
-    /// Récupère un patient par id
+    /// Récupère un patient par id (exclut les soft-deleted)
     pub async fn get(pool: &PgPool, id: Uuid) -> Result<Patient, sqlx::Error> {
+        let q = format!("{} WHERE id = $1 AND deleted_at IS NULL", SELECT);
+        sqlx::query_as::<_, Patient>(&q)
+            .bind(id)
+            .fetch_one(pool)
+            .await
+    }
+
+    /// Récupère un patient par id (inclut les soft-deleted — pour destroy)
+    pub async fn get_any(pool: &PgPool, id: Uuid) -> Result<Patient, sqlx::Error> {
         let q = format!("{} WHERE id = $1", SELECT);
         sqlx::query_as::<_, Patient>(&q)
             .bind(id)
@@ -98,20 +108,41 @@ impl Patient {
             .await
     }
 
-    /// Récupère le patient lié à un profil
+    /// Récupère le patient lié à un profil (exclut les soft-deleted)
     pub async fn find_by_profile_id(
         pool: &PgPool,
         profile_id: Uuid,
     ) -> Result<Option<Patient>, sqlx::Error> {
-        let q = format!("{} WHERE profile_id = $1", SELECT);
+        let q = format!("{} WHERE profile_id = $1 AND deleted_at IS NULL", SELECT);
         sqlx::query_as::<_, Patient>(&q)
             .bind(profile_id)
             .fetch_optional(pool)
             .await
     }
 
-    /// Supprime un patient (hard delete — pas de soft delete sur cette table)
-    pub async fn delete(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
+    /// Soft delete — marque deleted_at
+    pub async fn soft_delete(pool: &PgPool, id: Uuid) -> Result<Patient, sqlx::Error> {
+        sqlx::query_as::<_, Patient>(
+            r#"
+            UPDATE patients SET deleted_at = now()
+            WHERE id = $1 AND deleted_at IS NULL
+            RETURNING
+                id, profile_id, surgery_type, surgery_date,
+                initial_weight_kg::float8 AS initial_weight_kg,
+                target_weight_kg::float8  AS target_weight_kg,
+                height_cm::float8         AS height_cm,
+                date_of_birth, gender, blood_type,
+                primary_doctor_id, allergies, notes,
+                created_at, updated_at, deleted_at
+            "#,
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Hard delete — suppression définitive
+    pub async fn destroy(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
         sqlx::query("DELETE FROM patients WHERE id = $1")
             .bind(id)
             .execute(pool)
@@ -159,7 +190,7 @@ impl CreatePatientInput {
                 height_cm::float8         AS height_cm,
                 date_of_birth, gender, blood_type,
                 primary_doctor_id, allergies, notes,
-                created_at, updated_at
+                created_at, updated_at, deleted_at
             "#,
         )
         .bind(profile_id)
@@ -223,7 +254,7 @@ impl UpdatePatientInput {
                 height_cm::float8         AS height_cm,
                 date_of_birth, gender, blood_type,
                 primary_doctor_id, allergies, notes,
-                created_at, updated_at
+                created_at, updated_at, deleted_at
             "#,
         )
         .bind(id)

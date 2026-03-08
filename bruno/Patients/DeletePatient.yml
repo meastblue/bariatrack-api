@@ -14,10 +14,7 @@ http:
   body:
     type: json
     data: |-
-      {
-        "query": "mutation DeletePatient($id: UUID!) { deletePatient(id: $id) }",
-        "variables": { "id": "{{patient_id}}" }
-      }
+      {"query": "mutation DeletePatient($id: UUID!) { deletePatient(id: $id) { id deletedAt } }", "variables": {"id": "{{patient_id}}"}}
   auth: inherit
 
 settings:

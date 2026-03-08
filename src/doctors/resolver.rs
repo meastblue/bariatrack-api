@@ -101,11 +101,20 @@ impl DoctorMutation {
         Ok(doctor)
     }
 
-    /// Supprime un médecin (hard delete)
-    async fn delete_doctor(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<bool> {
+    /// Soft delete — marque deleted_at
+    async fn delete_doctor(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<Doctor> {
         let _claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
-        Doctor::delete(pool, id).await?;
+        let doctor = Doctor::soft_delete(pool, id).await?;
+        Ok(doctor)
+    }
+
+    /// Hard delete — suppression définitive (RGPD)
+    async fn destroy_doctor(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<bool> {
+        let _claims = get_claims(ctx)?;
+        let pool = ctx.data::<PgPool>()?;
+        Doctor::get_any(pool, id).await?;
+        Doctor::destroy(pool, id).await?;
         Ok(true)
     }
 }

@@ -1,7 +1,7 @@
 info:
-  name: DeleteDoctor
+  name: DestroyPatient
   type: http
-  seq: 8
+  seq: 7
 
 http:
   method: POST
@@ -14,7 +14,10 @@ http:
   body:
     type: json
     data: |-
-      {"query": "mutation DeleteDoctor($id: UUID!) { deleteDoctor(id: $id) { id deletedAt } }", "variables": {"id": "{{doctor_id}}"}}
+      {
+        "query": "mutation DestroyPatient($id: UUID!) { destroyPatient(id: $id) }",
+        "variables": { "id": "{{patient_id}}" }
+      }
   auth: inherit
 
 settings:

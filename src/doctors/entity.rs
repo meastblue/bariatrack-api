@@ -18,44 +18,57 @@ pub struct Doctor {
     pub is_verified: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 impl Doctor {
-    /// Liste tous les médecins
+    /// Liste tous les médecins non supprimés
     pub async fn list(pool: &PgPool) -> Result<Vec<Doctor>, sqlx::Error> {
         sqlx::query_as::<_, Doctor>(
-            "SELECT * FROM doctors ORDER BY created_at DESC",
+            "SELECT * FROM doctors WHERE deleted_at IS NULL ORDER BY created_at DESC",
         )
         .fetch_all(pool)
         .await
     }
 
-    /// Liste les médecins vérifiés uniquement
+    /// Liste les médecins vérifiés uniquement (non supprimés)
     pub async fn list_verified(pool: &PgPool) -> Result<Vec<Doctor>, sqlx::Error> {
         sqlx::query_as::<_, Doctor>(
-            "SELECT * FROM doctors WHERE is_verified = true ORDER BY created_at DESC",
+            "SELECT * FROM doctors WHERE is_verified = true AND deleted_at IS NULL ORDER BY created_at DESC",
         )
         .fetch_all(pool)
         .await
     }
 
-    /// Récupère un médecin par id
+    /// Récupère un médecin par id (exclut les soft-deleted)
     pub async fn get(pool: &PgPool, id: Uuid) -> Result<Doctor, sqlx::Error> {
+        sqlx::query_as::<_, Doctor>(
+            "SELECT * FROM doctors WHERE id = $1 AND deleted_at IS NULL",
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Récupère un médecin par id (inclut les soft-deleted — pour destroy)
+    pub async fn get_any(pool: &PgPool, id: Uuid) -> Result<Doctor, sqlx::Error> {
         sqlx::query_as::<_, Doctor>("SELECT * FROM doctors WHERE id = $1")
             .bind(id)
             .fetch_one(pool)
             .await
     }
 
-    /// Récupère le médecin lié à un profil
+    /// Récupère le médecin lié à un profil (exclut les soft-deleted)
     pub async fn find_by_profile_id(
         pool: &PgPool,
         profile_id: Uuid,
     ) -> Result<Option<Doctor>, sqlx::Error> {
-        sqlx::query_as::<_, Doctor>("SELECT * FROM doctors WHERE profile_id = $1")
-            .bind(profile_id)
-            .fetch_optional(pool)
-            .await
+        sqlx::query_as::<_, Doctor>(
+            "SELECT * FROM doctors WHERE profile_id = $1 AND deleted_at IS NULL",
+        )
+        .bind(profile_id)
+        .fetch_optional(pool)
+        .await
     }
 
     /// Vérifie un médecin (admin)
@@ -72,8 +85,22 @@ impl Doctor {
         .await
     }
 
-    /// Supprime un médecin (hard delete)
-    pub async fn delete(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
+    /// Soft delete — marque deleted_at
+    pub async fn soft_delete(pool: &PgPool, id: Uuid) -> Result<Doctor, sqlx::Error> {
+        sqlx::query_as::<_, Doctor>(
+            r#"
+            UPDATE doctors SET deleted_at = now()
+            WHERE id = $1 AND deleted_at IS NULL
+            RETURNING *
+            "#,
+        )
+        .bind(id)
+        .fetch_one(pool)
+        .await
+    }
+
+    /// Hard delete — suppression définitive
+    pub async fn destroy(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
         sqlx::query("DELETE FROM doctors WHERE id = $1")
             .bind(id)
             .execute(pool)
