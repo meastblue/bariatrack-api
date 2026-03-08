@@ -1,6 +1,23 @@
 name: dev
 variables:
-  - secret: true
-    name: supabase_url
-  - secret: true
-    name: supabase_publishable_key
+  - name: base_url
+    value: http://localhost:8080
+    secret: false
+  - name: access_token
+    value: ""
+    secret: true
+  - name: supabase_url
+    value: ""
+    secret: true
+  - name: supabase_publishable_key
+    value: ""
+    secret: true
+  - name: profile_id
+    value: ""
+    secret: false
+  - name: patient_id
+    value: ""
+    secret: false
+  - name: doctor_id
+    value: ""
+    secret: false

@@ -1,0 +1,30 @@
+info:
+  name: VerifyDoctor (admin)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: graphql
+    data:
+      query: |-
+        mutation VerifyDoctor($id: UUID!) {
+          verifyDoctor(id: $id) {
+            id
+            isVerified
+            updatedAt
+          }
+        }
+      variables:
+        id: "{{doctor_id}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true

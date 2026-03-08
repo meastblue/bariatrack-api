@@ -1,16 +1,17 @@
 use async_graphql::{EmptySubscription, MergedObject, Schema};
 use sqlx::PgPool;
 
+use crate::doctors::schema::{MutationRoot as DoctorMutation, QueryRoot as DoctorQuery};
 use crate::patients::schema::{MutationRoot as PatientMutation, QueryRoot as PatientQuery};
 use crate::profiles::schema::{MutationRoot as ProfileMutation, QueryRoot as ProfileQuery};
 
 // ── Merged Root Types ──────────────────────
 
 #[derive(MergedObject, Default)]
-pub struct QueryRoot(pub HealthQuery, pub ProfileQuery, pub PatientQuery);
+pub struct QueryRoot(pub HealthQuery, pub ProfileQuery, pub PatientQuery, pub DoctorQuery);
 
 #[derive(MergedObject, Default)]
-pub struct MutationRoot(pub HealthMutation, pub ProfileMutation, pub PatientMutation);
+pub struct MutationRoot(pub HealthMutation, pub ProfileMutation, pub PatientMutation, pub DoctorMutation);
 
 // ── Health (infra) ─────────────────────────
 

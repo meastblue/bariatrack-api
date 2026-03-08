@@ -1,4 +1,5 @@
 mod app;
+mod doctors;
 mod middlewares;
 mod patients;
 mod profiles;
