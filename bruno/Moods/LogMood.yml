@@ -1,0 +1,30 @@
+info:
+  name: LogMood
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation LogMood($data: LogMoodInput!) { logMood(data: $data) { id patientId mood note loggedAt createdAt } }",
+        "variables": {
+          "data": {
+            "mood": "GOOD",
+            "loggedAt": "2026-03-08",
+            "note": "Belle journée"
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

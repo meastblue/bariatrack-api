@@ -1,9 +1,13 @@
 mod app;
+mod appointments;
 mod doctors;
+mod hydration;
 mod middlewares;
+mod moods;
 mod patients;
 mod profiles;
 mod utils;
+mod weights;
 
 use app::server::Server;
 use tracing_subscriber::EnvFilter;

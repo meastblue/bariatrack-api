@@ -1,0 +1,27 @@
+info:
+  name: MyMoods
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MyMoods($limit: Int, $offset: Int) { myMoods(limit: $limit, offset: $offset) { id patientId mood note loggedAt createdAt } }",
+        "variables": {
+          "limit": 20,
+          "offset": 0
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

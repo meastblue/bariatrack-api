@@ -1,0 +1,32 @@
+info:
+  name: CreateAppointment
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation CreateAppointment($data: CreateAppointmentInput!) { createAppointment(data: $data) { id patientId doctorId appointmentType title scheduledAt durationMin location status notes createdAt updatedAt } }",
+        "variables": {
+          "data": {
+            "appointmentType": "CONSULTATION",
+            "title": "Consultation de suivi",
+            "scheduledAt": "2026-04-15T10:00:00Z",
+            "durationMin": 30,
+            "location": "Cabinet Dr. Martin"
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

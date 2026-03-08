@@ -1,0 +1,30 @@
+info:
+  name: UpdateAppointment
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation UpdateAppointment($id: UUID!, $data: UpdateAppointmentInput!) { updateAppointment(id: $id, data: $data) { id patientId appointmentType title scheduledAt durationMin status notes updatedAt } }",
+        "variables": {
+          "id": "00000000-0000-0000-0000-000000000000",
+          "data": {
+            "status": "CONFIRMED",
+            "notes": "Confirmé par téléphone"
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

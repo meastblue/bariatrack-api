@@ -1,0 +1,28 @@
+info:
+  name: PatientAppointments
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query PatientAppointments($patientId: UUID!, $limit: Int, $offset: Int) { patientAppointments(patientId: $patientId, limit: $limit, offset: $offset) { id patientId doctorId appointmentType title scheduledAt durationMin status notes createdAt } }",
+        "variables": {
+          "patientId": "00000000-0000-0000-0000-000000000000",
+          "limit": 20,
+          "offset": 0
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

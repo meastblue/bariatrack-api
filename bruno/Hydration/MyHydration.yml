@@ -1,0 +1,27 @@
+info:
+  name: MyHydration
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MyHydration($limit: Int, $offset: Int) { myHydration(limit: $limit, offset: $offset) { id patientId totalMl goalMl loggedAt source createdAt } }",
+        "variables": {
+          "limit": 20,
+          "offset": 0
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

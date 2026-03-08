@@ -1,0 +1,27 @@
+info:
+  name: MyAppointments
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MyAppointments($limit: Int, $offset: Int) { myAppointments(limit: $limit, offset: $offset) { id patientId doctorId appointmentType title scheduledAt durationMin location teleconsultUrl status notes createdAt updatedAt } }",
+        "variables": {
+          "limit": 20,
+          "offset": 0
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

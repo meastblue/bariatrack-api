@@ -1,0 +1,26 @@
+info:
+  name: DeleteAppointment
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation DeleteAppointment($id: UUID!) { deleteAppointment(id: $id) }",
+        "variables": {
+          "id": "00000000-0000-0000-0000-000000000000"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

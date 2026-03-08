@@ -1,0 +1,26 @@
+info:
+  name: CancelAppointment
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation CancelAppointment($id: UUID!) { cancelAppointment(id: $id) { id status updatedAt } }",
+        "variables": {
+          "id": "00000000-0000-0000-0000-000000000000"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
