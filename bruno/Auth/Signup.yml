@@ -1,0 +1,42 @@
+info:
+  name: Signup
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{supabase_url}}/auth/v1/signup"
+  headers:
+    - name: apiKey
+      value: "{{supabase_publishable_key}}"
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: ""
+      value: ""
+      type: query
+    - name: ""
+      value: ""
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "email": "test@test.com",
+        "password": "test1234"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const body = res.body;
+
+        bru.setVar("access_token", body.access_token);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
