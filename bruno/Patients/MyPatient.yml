@@ -12,27 +12,11 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        query MyPatient {
-          myPatient {
-            id
-            profileId
-            surgeryType
-            surgeryDate
-            initialWeightKg
-            targetWeightKg
-            heightCm
-            gender
-            bloodType
-            primaryDoctorId
-            allergies
-            notes
-            createdAt
-            updatedAt
-          }
-        }
+    type: json
+    data: |
+      {
+        "query": "query MyPatient { myPatient { id profileId surgeryType surgeryDate initialWeightKg targetWeightKg heightCm gender bloodType primaryDoctorId allergies notes createdAt updatedAt } }"
+      }
   auth: inherit
 
 settings:

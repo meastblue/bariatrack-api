@@ -12,14 +12,14 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        mutation DestroyProfile($id: UUID!) {
-          destroyProfile(id: $id)
+    type: json
+    data: |
+      {
+        "query": "mutation DestroyProfile($id: UUID!) { destroyProfile(id: $id) }",
+        "variables": {
+          "id": "{{profile_id}}"
         }
-      variables:
-        id: "{{profile_id}}"
+      }
   auth: inherit
 
 settings:

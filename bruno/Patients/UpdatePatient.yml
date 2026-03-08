@@ -12,22 +12,18 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        mutation UpdatePatient($id: UUID!, $data: UpdatePatientInput!) {
-          updatePatient(id: $id, data: $data) {
-            id
-            targetWeightKg
-            notes
-            updatedAt
+    type: json
+    data: |
+      {
+        "query": "mutation UpdatePatient($id: UUID!, $data: UpdatePatientInput!) { updatePatient(id: $id, data: $data) { id targetWeightKg notes updatedAt } }",
+        "variables": {
+          "id": "{{patient_id}}",
+          "data": {
+            "targetWeightKg": 72.0,
+            "notes": "Objectif révisé après consultation"
           }
         }
-      variables:
-        id: "{{patient_id}}"
-        data:
-          targetWeightKg: 72.0
-          notes: "Objectif révisé après consultation"
+      }
   auth: inherit
 
 settings:

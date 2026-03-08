@@ -12,20 +12,11 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        query ListPatients {
-          patients {
-            id
-            profileId
-            surgeryType
-            surgeryDate
-            initialWeightKg
-            heightCm
-            createdAt
-          }
-        }
+    type: json
+    data: |
+      {
+        "query": "query ListPatients { patients { id profileId surgeryType surgeryDate initialWeightKg heightCm createdAt } }"
+      }
   auth: inherit
 
 settings:

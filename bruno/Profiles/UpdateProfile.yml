@@ -12,20 +12,15 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        mutation UpdateProfile($id: UUID!, $data: UpdateProfileInput!) {
-          updateProfile(id: $id, data: $data) {
-            id
-            locale
-            updatedAt
-          }
+    type: json
+    data: |
+      {
+        "query": "mutation UpdateProfile($id: UUID!, $data: UpdateProfileInput!) { updateProfile(id: $id, data: $data) { id locale updatedAt } }",
+        "variables": {
+          "id": "{{profile_id}}",
+          "data": { "locale": "fr" }
         }
-      variables:
-        id: "{{profile_id}}"
-        data:
-          locale: fr
+      }
   auth: inherit
 
 settings:

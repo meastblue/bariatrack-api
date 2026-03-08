@@ -12,14 +12,14 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        mutation DeletePatient($id: UUID!) {
-          deletePatient(id: $id)
+    type: json
+    data: |
+      {
+        "query": "mutation DeletePatient($id: UUID!) { deletePatient(id: $id) }",
+        "variables": {
+          "id": "{{patient_id}}"
         }
-      variables:
-        id: "{{patient_id}}"
+      }
   auth: inherit
 
 settings:

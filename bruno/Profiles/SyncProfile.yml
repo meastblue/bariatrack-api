@@ -12,18 +12,11 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: graphql
-    data:
-      query: |-
-        mutation SyncProfile {
-          syncProfile(data: { role: PATIENT }) {
-            id
-            email
-            role
-            locale
-            createdAt
-          }
-        }
+    type: json
+    data: |
+      {
+        "query": "mutation SyncProfile { syncProfile(data: { role: PATIENT }) { id email role locale createdAt } }"
+      }
   auth: inherit
 
 settings:
