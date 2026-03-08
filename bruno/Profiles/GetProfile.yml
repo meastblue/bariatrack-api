@@ -1,0 +1,35 @@
+info:
+  name: GetProfile
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: graphql
+    data:
+      query: |-
+        query GetProfile($id: UUID!) {
+          getProfile(id: $id) {
+            id
+            authUserId
+            email
+            role
+            locale
+            createdAt
+            updatedAt
+            deletedAt
+          }
+        }
+      variables:
+        id: "{{profile_id}}"
+  auth: inherit
+
+settings:
+  encodeUrl: true
