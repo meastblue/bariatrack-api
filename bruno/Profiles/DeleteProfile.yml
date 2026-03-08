@@ -8,7 +8,7 @@ http:
   url: "{{base_url}}/graphql"
   headers:
     - name: Authorization
-      value: "Bearer {{access_token}}"
+      value: Bearer {{access_token}}
     - name: Content-Type
       value: application/json
   body:
@@ -16,9 +16,14 @@ http:
     data: |-
       {
         "query": "mutation DeleteProfile($id: UUID!) { deleteProfile(id: $id) { id deletedAt } }",
-        "variables": { "id": "{{profile_id}}" }
+        "variables": {
+          "id": "{{profile_id}}"
+        }
       }
   auth: inherit
 
 settings:
   encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
