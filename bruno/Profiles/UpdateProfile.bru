@@ -1,0 +1,35 @@
+meta {
+  name: UpdateProfile
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{base_url}}/graphql
+  body: graphql
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+}
+
+body:graphql {
+  mutation UpdateProfile($id: UUID!, $data: UpdateProfileInput!) {
+    updateProfile(id: $id, data: $data) {
+      id
+      locale
+      updatedAt
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "id": "{{profile_id}}",
+    "data": {
+      "locale": "fr"
+    }
+  }
+}

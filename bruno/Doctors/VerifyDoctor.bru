@@ -1,0 +1,32 @@
+meta {
+  name: VerifyDoctor (admin)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/graphql
+  body: graphql
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+}
+
+body:graphql {
+  mutation VerifyDoctor($id: UUID!) {
+    verifyDoctor(id: $id) {
+      id
+      isVerified
+      updatedAt
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "id": "{{doctor_id}}"
+  }
+}

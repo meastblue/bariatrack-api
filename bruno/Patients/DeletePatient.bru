@@ -1,0 +1,28 @@
+meta {
+  name: DeletePatient
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base_url}}/graphql
+  body: graphql
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{access_token}}
+  Content-Type: application/json
+}
+
+body:graphql {
+  mutation DeletePatient($id: UUID!) {
+    deletePatient(id: $id)
+  }
+}
+
+body:graphql:vars {
+  {
+    "id": "{{patient_id}}"
+  }
+}
