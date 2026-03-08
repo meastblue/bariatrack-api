@@ -2,6 +2,7 @@ use async_graphql::{EmptySubscription, MergedObject, Schema};
 use sqlx::PgPool;
 
 use crate::appointments::schema::{AppointmentMutation, AppointmentQuery};
+use crate::doctor_patients::schema::{DoctorPatientMutation, DoctorPatientQuery};
 use crate::doctors::schema::{DoctorMutation, DoctorQuery};
 use crate::hydration::schema::{HydrationMutation, HydrationQuery};
 use crate::moods::schema::{MoodMutation, MoodQuery};
@@ -17,6 +18,7 @@ pub struct QueryRoot(
     pub ProfileQuery,
     pub PatientQuery,
     pub DoctorQuery,
+    pub DoctorPatientQuery,
     pub WeightQuery,
     pub MoodQuery,
     pub HydrationQuery,
@@ -29,6 +31,7 @@ pub struct MutationRoot(
     pub ProfileMutation,
     pub PatientMutation,
     pub DoctorMutation,
+    pub DoctorPatientMutation,
     pub WeightMutation,
     pub MoodMutation,
     pub HydrationMutation,

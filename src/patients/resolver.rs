@@ -3,8 +3,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use super::entity::{CreatePatientInput, Patient, UpdatePatientInput};
-use crate::profiles::entity::Profile;
-use crate::utils::auth::Claims;
+use crate::profiles::entity::{Profile, UserRole};
+use crate::utils::auth::{require_role, Claims};
 
 fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
     ctx.data::<Claims>()
@@ -21,13 +21,15 @@ pub struct PatientQuery;
 impl PatientQuery {
     /// Liste tous les patients (admin only)
     async fn patients(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<Patient>> {
+        require_role(ctx, UserRole::Admin).await?;
         let pool = ctx.data::<PgPool>()?;
         let patients = Patient::list(pool).await?;
         Ok(patients)
     }
 
-    /// Récupère un patient par id
+    /// Récupère un patient par id (admin only)
     async fn patient(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<Patient> {
+        require_role(ctx, UserRole::Admin).await?;
         let pool = ctx.data::<PgPool>()?;
         let patient = Patient::get(pool, id).await?;
         Ok(patient)

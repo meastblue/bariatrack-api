@@ -3,9 +3,9 @@ use reqwest::Client;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use super::entity::{Profile, SyncProfileInput, UpdateProfileInput};
+use super::entity::{Profile, SyncProfileInput, UpdateProfileInput, UserRole};
 use crate::app::routes::SupabaseAdmin;
-use crate::utils::auth::Claims;
+use crate::utils::auth::{require_role, Claims};
 
 fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
     ctx.data::<Claims>()
@@ -26,13 +26,15 @@ impl ProfileQuery {
         ctx: &Context<'_>,
         #[graphql(default = false)] include_deleted: bool,
     ) -> async_graphql::Result<Vec<Profile>> {
+        require_role(ctx, UserRole::Admin).await?;
         let pool = ctx.data::<PgPool>()?;
         let profiles = Profile::list(pool, include_deleted).await?;
         Ok(profiles)
     }
 
-    /// Get profile by id
+    /// Get profile by id (admin only)
     async fn get_profile(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<Profile> {
+        require_role(ctx, UserRole::Admin).await?;
         let pool = ctx.data::<PgPool>()?;
         let profile = Profile::get(pool, id).await?;
         Ok(profile)
@@ -96,15 +98,22 @@ impl ProfileMutation {
     }
 
     /// Hard delete profile — suppression définitive (RGPD purge)
-    /// Supprime dans notre DB ET dans Supabase Auth
+    /// Supprime dans notre DB ET dans Supabase Auth — réservé au propriétaire du compte
     async fn destroy_profile(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<bool> {
-        let _claims = get_claims(ctx)?;
+        let claims = get_claims(ctx)?;
         let pool = ctx.data::<PgPool>()?;
         let admin = ctx.data::<SupabaseAdmin>()?;
 
         // Récupérer le auth_uid avant suppression (inclut les soft-deleted)
         let profile = Profile::get_any(pool, id).await
             .map_err(|_| format!("Profile {} not found", id))?;
+
+        // Vérifier que c'est bien le propriétaire du compte
+        let caller_uid = claims.supabase_uid().map_err(|_| "Invalid auth user ID")?;
+        if profile.auth_uid != caller_uid {
+            return Err("Forbidden: you can only delete your own account".into());
+        }
+
         let auth_uid = profile.auth_uid;
 
         // Supprimer dans notre DB

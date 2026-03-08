@@ -3,8 +3,8 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use super::entity::{CreateDoctorInput, Doctor, UpdateDoctorInput};
-use crate::profiles::entity::Profile;
-use crate::utils::auth::Claims;
+use crate::profiles::entity::{Profile, UserRole};
+use crate::utils::auth::{require_role, Claims};
 
 fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
     ctx.data::<Claims>()
@@ -19,8 +19,9 @@ pub struct DoctorQuery;
 
 #[async_graphql::Object]
 impl DoctorQuery {
-    /// Liste tous les médecins (admin)
+    /// Liste tous les médecins (admin only)
     async fn doctors(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<Doctor>> {
+        require_role(ctx, UserRole::Admin).await?;
         let pool = ctx.data::<PgPool>()?;
         let doctors = Doctor::list(pool).await?;
         Ok(doctors)
@@ -95,7 +96,7 @@ impl DoctorMutation {
 
     /// Vérifie un médecin — admin only
     async fn verify_doctor(&self, ctx: &Context<'_>, id: Uuid) -> async_graphql::Result<Doctor> {
-        let _claims = get_claims(ctx)?;
+        require_role(ctx, UserRole::Admin).await?;
         let pool = ctx.data::<PgPool>()?;
         let doctor = Doctor::verify(pool, id).await?;
         Ok(doctor)

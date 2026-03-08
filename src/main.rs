@@ -1,5 +1,6 @@
 mod app;
 mod appointments;
+mod doctor_patients;
 mod doctors;
 mod hydration;
 mod middlewares;
