@@ -19,9 +19,13 @@ pub struct QueryRoot;
 #[async_graphql::Object]
 impl QueryRoot {
     /// List all profiles (admin only)
-    async fn list_profiles(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<Profile>> {
+    async fn list_profiles(
+        &self,
+        ctx: &Context<'_>,
+        include_deleted: bool,
+    ) -> async_graphql::Result<Vec<Profile>> {
         let pool = ctx.data::<PgPool>()?;
-        let profiles = Profile::list(pool).await?;
+        let profiles = Profile::list(pool, include_deleted).await?;
         Ok(profiles)
     }
 

@@ -30,22 +30,21 @@ pub struct Profile {
 
 impl Profile {
     /// List all active profiles (admin)
-    pub async fn list(pool: &PgPool) -> Result<Vec<Profile>, sqlx::Error> {
-        sqlx::query_as::<_, Profile>(
-            "SELECT * FROM profiles WHERE deleted_at IS NULL ORDER BY created_at DESC",
-        )
-        .fetch_all(pool)
-        .await
+    pub async fn list(pool: &PgPool, include_deleted: bool) -> Result<Vec<Profile>, sqlx::Error> {
+        let query = if include_deleted {
+            "SELECT * FROM profiles ORDER BY created_at DESC"
+        } else {
+            "SELECT * FROM profiles WHERE deleted_at IS NULL ORDER BY created_at DESC"
+        };
+        sqlx::query_as::<_, Profile>(query).fetch_all(pool).await
     }
 
     /// Get profile by id
     pub async fn get(pool: &PgPool, id: Uuid) -> Result<Profile, sqlx::Error> {
-        sqlx::query_as::<_, Profile>(
-            "SELECT * FROM profiles WHERE id = $1 AND deleted_at IS NULL",
-        )
-        .bind(id)
-        .fetch_one(pool)
-        .await
+        sqlx::query_as::<_, Profile>("SELECT * FROM profiles WHERE id = $1 AND deleted_at IS NULL")
+            .bind(id)
+            .fetch_one(pool)
+            .await
     }
 
     /// Get profile by Supabase auth_user_id
