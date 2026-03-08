@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "mutation CreatePatient($data: CreatePatientInput!) { createPatient(data: $data) { id profileId surgeryType surgeryDate initialWeightKg targetWeightKg heightCm gender bloodType createdAt } }",
         "variables": {

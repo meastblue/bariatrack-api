@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "query GetProfile($id: UUID!) { getProfile(id: $id) { id authUserId email role locale createdAt updatedAt deletedAt } }",
         "variables": {

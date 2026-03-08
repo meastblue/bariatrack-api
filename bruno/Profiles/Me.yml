@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "query Me { me { id email role locale createdAt updatedAt } }"
       }

@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "mutation VerifyDoctor($id: UUID!) { verifyDoctor(id: $id) { id isVerified updatedAt } }",
         "variables": {

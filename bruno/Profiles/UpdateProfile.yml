@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "mutation UpdateProfile($id: UUID!, $data: UpdateProfileInput!) { updateProfile(id: $id, data: $data) { id locale updatedAt } }",
         "variables": {

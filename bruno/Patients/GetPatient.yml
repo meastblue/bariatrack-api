@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "query GetPatient($id: UUID!) { patient(id: $id) { id profileId surgeryType surgeryDate initialWeightKg targetWeightKg heightCm dateOfBirth gender bloodType primaryDoctorId allergies notes createdAt updatedAt } }",
         "variables": {

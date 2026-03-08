@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "mutation DestroyProfile($id: UUID!) { destroyProfile(id: $id) }",
         "variables": {

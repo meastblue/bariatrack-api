@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "mutation DeletePatient($id: UUID!) { deletePatient(id: $id) }",
         "variables": {

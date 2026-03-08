@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "query MyDoctor { myDoctor { id profileId specialty licenseNumber hospitalName phoneProfessional timezone isVerified createdAt updatedAt } }"
       }

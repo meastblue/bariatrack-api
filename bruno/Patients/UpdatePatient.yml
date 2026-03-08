@@ -12,8 +12,8 @@ http:
     - name: Content-Type
       value: application/json
   body:
-    type: json
-    data: |
+    mode: json
+    json: |
       {
         "query": "mutation UpdatePatient($id: UUID!, $data: UpdatePatientInput!) { updatePatient(id: $id, data: $data) { id targetWeightKg notes updatedAt } }",
         "variables": {
