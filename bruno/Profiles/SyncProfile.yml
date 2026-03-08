@@ -19,5 +19,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { syncProfile } = res.body.data;
+        bru.setVar("profile_id", syncProfile.id);
+
 settings:
   encodeUrl: true

@@ -103,7 +103,8 @@ impl ProfileMutation {
         let admin = ctx.data::<SupabaseAdmin>()?;
 
         // Récupérer le auth_uid avant suppression
-        let profile = Profile::get(pool, id).await?;
+        let profile = Profile::get(pool, id).await
+            .map_err(|_| format!("Profile {} not found", id))?;
         let auth_uid = profile.auth_uid;
 
         // Supprimer dans notre DB
