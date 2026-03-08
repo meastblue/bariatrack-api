@@ -27,5 +27,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { logWeight } = res.body.data;
+        if (logWeight) bru.setVar("weight_id", logWeight.id);
+
 settings:
   encodeUrl: true

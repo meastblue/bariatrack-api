@@ -26,5 +26,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { updateAppointment } = res.body.data;
+        if (updateAppointment) bru.setVar("appointment_id", updateAppointment.id);
+
 settings:
   encodeUrl: true

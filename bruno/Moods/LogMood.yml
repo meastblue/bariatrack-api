@@ -26,5 +26,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { logMood } = res.body.data;
+        if (logMood) bru.setVar("mood_id", logMood.id);
+
 settings:
   encodeUrl: true

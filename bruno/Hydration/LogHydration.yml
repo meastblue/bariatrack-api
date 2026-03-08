@@ -27,5 +27,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { logHydration } = res.body.data;
+        if (logHydration) bru.setVar("hydration_id", logHydration.id);
+
 settings:
   encodeUrl: true

@@ -21,3 +21,15 @@ variables:
   - name: doctor_id
     value: ""
     secret: false
+  - name: weight_id
+    value: ""
+    secret: false
+  - name: mood_id
+    value: ""
+    secret: false
+  - name: hydration_id
+    value: ""
+    secret: false
+  - name: appointment_id
+    value: ""
+    secret: false

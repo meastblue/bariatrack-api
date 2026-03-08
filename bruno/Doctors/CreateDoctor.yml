@@ -28,5 +28,12 @@ http:
       }
   auth: inherit
 
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { createDoctor } = res.body.data;
+        bru.setVar("doctor_id", createDoctor.id);
+
 settings:
   encodeUrl: true
