@@ -1,0 +1,23 @@
+info:
+  name: MyDoctorPatients
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MyDoctorPatients { myDoctorPatients { id doctorId patientId status assignedAt } }"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

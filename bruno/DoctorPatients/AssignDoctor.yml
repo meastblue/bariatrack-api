@@ -1,0 +1,27 @@
+info:
+  name: AssignDoctor
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation AssignDoctor($doctorId: UUID!, $patientId: UUID!) { assignDoctor(doctorId: $doctorId, patientId: $patientId) { id doctorId patientId status assignedAt } }",
+        "variables": {
+          "doctorId": "{{doctor_id}}",
+          "patientId": "{{patient_id}}"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
