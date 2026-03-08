@@ -1,7 +1,7 @@
 info:
   name: LogSupplementTaken
   type: http
-  seq: 6
+  seq: 5
 
 http:
   method: POST
@@ -15,7 +15,7 @@ http:
     type: json
     data: |-
       {
-        "query": "mutation LogSupplementTaken($supplementId: UUID!) { logSupplementTaken(supplementId: $supplementId) { id supplementId takenAt } }",
+        "query": "mutation LogSupplementTaken($supplementId: UUID!) { logSupplementTaken(supplementId: $supplementId) { id supplementId patientId takenAt } }",
         "variables": {
           "supplementId": "{{supplement_id}}"
         }

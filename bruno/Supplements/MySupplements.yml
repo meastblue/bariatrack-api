@@ -15,7 +15,7 @@ http:
     type: json
     data: |-
       {
-        "query": "query MySupplements { mySupplements { id name dosage frequency isActive prescribedBy startedAt } }"
+        "query": "query { mySupplements { id name dosage frequency isActive prescribedBy startedAt endedAt createdAt } }"
       }
   auth: inherit
 

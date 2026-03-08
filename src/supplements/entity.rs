@@ -66,13 +66,6 @@ impl Supplement {
         .await
     }
 
-    pub async fn get(pool: &PgPool, id: Uuid) -> Result<Supplement, sqlx::Error> {
-        sqlx::query_as::<_, Supplement>("SELECT * FROM supplements WHERE id = $1")
-            .bind(id)
-            .fetch_one(pool)
-            .await
-    }
-
     pub async fn create(pool: &PgPool, patient_id: Uuid, doctor_id: Option<Uuid>, input: CreateSupplementInput) -> Result<Supplement, sqlx::Error> {
         sqlx::query_as::<_, Supplement>(
             r#"INSERT INTO supplements (patient_id, name, dosage, frequency, prescribed_by, started_at, ended_at)

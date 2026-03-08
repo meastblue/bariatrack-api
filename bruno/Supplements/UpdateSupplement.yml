@@ -19,7 +19,7 @@ http:
         "variables": {
           "id": "{{supplement_id}}",
           "data": {
-            "dosage": "4000 UI",
+            "dosage": "500 mcg",
             "isActive": true
           }
         }

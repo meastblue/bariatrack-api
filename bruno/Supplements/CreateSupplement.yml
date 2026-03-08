@@ -15,11 +15,12 @@ http:
     type: json
     data: |-
       {
-        "query": "mutation CreateSupplement($data: CreateSupplementInput!) { createSupplement(data: $data) { id name dosage frequency isActive } }",
+        "query": "mutation CreateSupplement($patientId: UUID!, $data: CreateSupplementInput!) { createSupplement(patientId: $patientId, data: $data) { id name dosage frequency isActive prescribedBy startedAt } }",
         "variables": {
+          "patientId": "{{patient_id}}",
           "data": {
-            "name": "Vitamine D3",
-            "dosage": "2000 UI",
+            "name": "Vitamine B12",
+            "dosage": "1000 mcg",
             "frequency": "DAILY",
             "startedAt": "2026-03-08"
           }
