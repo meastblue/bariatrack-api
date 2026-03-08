@@ -1,0 +1,32 @@
+info:
+  name: CreateDoctor
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation CreateDoctor($data: CreateDoctorInput!) { createDoctor(data: $data) { id profileId specialty licenseNumber hospitalName phoneProfessional timezone isVerified createdAt } }",
+        "variables": {
+          "data": {
+            "specialty": "chirurgie_bariatrique",
+            "licenseNumber": "10012345678",
+            "hospitalName": "Hôpital Lariboisière",
+            "phoneProfessional": "+33612345678",
+            "timezone": "Europe/Paris"
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

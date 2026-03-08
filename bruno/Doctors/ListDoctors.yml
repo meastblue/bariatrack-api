@@ -1,0 +1,23 @@
+info:
+  name: ListDoctors (admin)
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query ListDoctors { doctors { id profileId specialty licenseNumber hospitalName phoneProfessional timezone isVerified createdAt updatedAt } }"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

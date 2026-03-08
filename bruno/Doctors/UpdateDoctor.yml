@@ -1,0 +1,30 @@
+info:
+  name: UpdateDoctor
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation UpdateDoctor($id: UUID!, $data: UpdateDoctorInput!) { updateDoctor(id: $id, data: $data) { id hospitalName phoneProfessional updatedAt } }",
+        "variables": {
+          "id": "{{doctor_id}}",
+          "data": {
+            "hospitalName": "Clinique Saint-Michel",
+            "phoneProfessional": "+33698765432"
+          }
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

@@ -1,0 +1,23 @@
+info:
+  name: SyncProfile
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation SyncProfile { syncProfile(data: { role: PATIENT }) { id email role locale createdAt } }"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

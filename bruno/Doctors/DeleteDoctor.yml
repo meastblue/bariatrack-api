@@ -1,0 +1,24 @@
+info:
+  name: DeleteDoctor
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation DeleteDoctor($id: UUID!) { deleteDoctor(id: $id) }",
+        "variables": { "id": "{{doctor_id}}" }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
