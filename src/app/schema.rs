@@ -1,9 +1,9 @@
 use async_graphql::{EmptySubscription, MergedObject, Schema};
 use sqlx::PgPool;
 
-use crate::doctors::schema::{MutationRoot as DoctorMutation, QueryRoot as DoctorQuery};
-use crate::patients::schema::{MutationRoot as PatientMutation, QueryRoot as PatientQuery};
-use crate::profiles::schema::{MutationRoot as ProfileMutation, QueryRoot as ProfileQuery};
+use crate::doctors::schema::{DoctorMutation, DoctorQuery};
+use crate::patients::schema::{PatientMutation, PatientQuery};
+use crate::profiles::schema::{ProfileMutation, ProfileQuery};
 
 // ── Merged Root Types ──────────────────────
 

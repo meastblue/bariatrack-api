@@ -1,1 +1,1 @@
-pub(crate) use super::resolver::{MutationRoot, QueryRoot};
+pub use super::resolver::{ProfileMutation, ProfileQuery};

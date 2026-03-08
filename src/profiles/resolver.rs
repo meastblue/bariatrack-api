@@ -14,10 +14,10 @@ fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
 // ── Query ──────────────────────────────────
 
 #[derive(Default)]
-pub struct QueryRoot;
+pub struct ProfileQuery;
 
 #[async_graphql::Object]
-impl QueryRoot {
+impl ProfileQuery {
     /// List all profiles (admin only)
     async fn list_profiles(
         &self,
@@ -53,10 +53,10 @@ impl QueryRoot {
 // ── Mutation ───────────────────────────────
 
 #[derive(Default)]
-pub struct MutationRoot;
+pub struct ProfileMutation;
 
 #[async_graphql::Object]
-impl MutationRoot {
+impl ProfileMutation {
     /// Sync profile depuis Supabase Auth — appeler au premier login
     async fn sync_profile(
         &self,

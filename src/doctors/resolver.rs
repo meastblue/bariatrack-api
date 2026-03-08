@@ -15,10 +15,10 @@ fn get_claims(ctx: &Context<'_>) -> async_graphql::Result<Claims> {
 // ── Query ──────────────────────────────────
 
 #[derive(Default)]
-pub struct QueryRoot;
+pub struct DoctorQuery;
 
 #[async_graphql::Object]
-impl QueryRoot {
+impl DoctorQuery {
     /// Liste tous les médecins (admin)
     async fn doctors(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<Doctor>> {
         let pool = ctx.data::<PgPool>()?;
@@ -58,10 +58,10 @@ impl QueryRoot {
 // ── Mutation ───────────────────────────────
 
 #[derive(Default)]
-pub struct MutationRoot;
+pub struct DoctorMutation;
 
 #[async_graphql::Object]
-impl MutationRoot {
+impl DoctorMutation {
     /// Crée le profil médecin de l'utilisateur connecté
     async fn create_doctor(
         &self,

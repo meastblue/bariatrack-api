@@ -1,1 +1,1 @@
-pub use super::resolver::{MutationRoot, QueryRoot};
+pub use super::resolver::{PatientMutation, PatientQuery};
