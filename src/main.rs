@@ -8,6 +8,7 @@ mod moods;
 mod patients;
 mod profiles;
 mod utils;
+mod supplements;
 mod weights;
 
 use app::server::Server;

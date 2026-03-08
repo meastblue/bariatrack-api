@@ -8,6 +8,7 @@ use crate::hydration::schema::{HydrationMutation, HydrationQuery};
 use crate::moods::schema::{MoodMutation, MoodQuery};
 use crate::patients::schema::{PatientMutation, PatientQuery};
 use crate::profiles::schema::{ProfileMutation, ProfileQuery};
+use crate::supplements::schema::{SupplementMutation, SupplementQuery};
 use crate::weights::schema::{WeightMutation, WeightQuery};
 
 // ── Merged Root Types ──────────────────────
@@ -23,6 +24,7 @@ pub struct QueryRoot(
     pub MoodQuery,
     pub HydrationQuery,
     pub AppointmentQuery,
+    pub SupplementQuery,
 );
 
 #[derive(MergedObject, Default)]
@@ -36,6 +38,7 @@ pub struct MutationRoot(
     pub MoodMutation,
     pub HydrationMutation,
     pub AppointmentMutation,
+    pub SupplementMutation,
 );
 
 // ── Health (infra) ─────────────────────────

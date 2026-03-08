@@ -1,0 +1,26 @@
+info:
+  name: DeleteSupplementLog
+  type: http
+  seq: 7
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation DeleteSupplementLog($id: UUID!) { deleteSupplementLog(id: $id) }",
+        "variables": {
+          "id": "{{supplement_log_id}}"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true

@@ -1,0 +1,33 @@
+info:
+  name: LogSupplementTaken
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "mutation LogSupplementTaken($supplementId: UUID!) { logSupplementTaken(supplementId: $supplementId) { id supplementId takenAt } }",
+        "variables": {
+          "supplementId": "{{supplement_id}}"
+        }
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const { logSupplementTaken } = res.body.data;
+        bru.setVar("supplement_log_id", logSupplementTaken.id);
+
+settings:
+  encodeUrl: true

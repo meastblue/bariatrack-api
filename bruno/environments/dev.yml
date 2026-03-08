@@ -33,3 +33,9 @@ variables:
   - name: appointment_id
     value: ""
     secret: false
+  - name: supplement_id
+    value: ""
+    secret: false
+  - name: supplement_log_id
+    value: ""
+    secret: false

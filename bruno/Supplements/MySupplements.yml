@@ -1,0 +1,23 @@
+info:
+  name: MySupplements
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{base_url}}/graphql"
+  headers:
+    - name: Authorization
+      value: "Bearer {{access_token}}"
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "query": "query MySupplements { mySupplements { id name dosage frequency isActive prescribedBy startedAt } }"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
